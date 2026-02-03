@@ -1,1 +1,1 @@
-# densei-skills-agent
+# densei-skills-template
