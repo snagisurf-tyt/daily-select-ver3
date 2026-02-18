@@ -44,3 +44,9 @@ coverage/
 # yarn.lock
 
 .claude/settings.local.json
+
+# Claude skills (symlinked)
+.claude/skills/
+
+# Codex skills (symlinked)
+.agents/skills/
