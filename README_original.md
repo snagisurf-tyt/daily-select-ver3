@@ -1,3 +1,5 @@
+<!-- README.mdと同じものです。 -->
+
 # SDD Template
 
 **Spec Driven Development (SDD)** のプロジェクトテンプレートです。
