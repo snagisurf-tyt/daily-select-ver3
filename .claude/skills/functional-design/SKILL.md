@@ -2,6 +2,7 @@
 name: functional-design
 description: 機能設計書を作成するための詳細ガイドとテンプレート。機能設計書作成時にのみ使用。
 allowed-tools: Read, Write
+caller: /setup-project
 ---
 
 # 機能設計書作成スキル

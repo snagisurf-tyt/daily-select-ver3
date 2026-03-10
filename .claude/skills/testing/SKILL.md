@@ -2,6 +2,7 @@
 name: testing
 description: 実装した機能の動作確認とリグレッションチェックを行うスキル。品質ゲート（lint/test/build）通過後に、実際に機能が動くか・既存機能が壊れていないかを確認する。/add-feature の品質ゲート通過後に呼び出される。
 allowed-tools: Bash, Read, Write, Edit
+caller: /add-feature, /add-feature-ui
 ---
 
 # Testing スキル（動作確認・リグレッションチェック）

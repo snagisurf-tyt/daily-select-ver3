@@ -2,6 +2,7 @@
 name: repository-structure
 description: リポジトリ構造定義書を作成するための詳細ガイドとテンプレート。リポジトリ構造定義時にのみ使用。
 allowed-tools: Read, Write
+caller: /setup-project
 ---
 
 # リポジトリ構造定義スキル

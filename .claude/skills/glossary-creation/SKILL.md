@@ -2,6 +2,7 @@
 name: glossary-creation
 description: 用語集を作成するための詳細ガイドとテンプレート。用語集作成時にのみ使用。
 allowed-tools: Read, Write
+caller: /setup-project
 ---
 
 # 用語集作成スキル
