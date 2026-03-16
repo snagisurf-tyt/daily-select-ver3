@@ -11,5 +11,17 @@
     "deny": [],
     "ask": []
   },
-  "hooks": {}
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c \"[ -f package.json ] && npm run lint --silent 2>&1 | head -30 || exit 0\""
+          }
+        ]
+      }
+    ]
+  }
 }

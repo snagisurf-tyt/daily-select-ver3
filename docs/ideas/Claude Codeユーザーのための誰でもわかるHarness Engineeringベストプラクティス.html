@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code / Codex ユーザーのための誰でもわかるHarness Engineeringベストプラクティス - 逆瀬川ちゃんのブログ</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+    
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="逆瀬川ちゃんのブログ">
+    <link rel="alternate" href="/feed.json" type="application/json" title="逆瀬川ちゃんのブログ">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="https://nyosegawa.github.io/posts/harness-engineering-best-practices-2026/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&amp;family=M+PLUS+Rounded+1c:wght@400;700;800&amp;display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<meta name="twitter:site" content="@gyakuse">
+  <meta property="og:type" content="article">
+<meta property="og:site_name" content="逆瀬川ちゃんのブログ">
+<meta property="og:locale" content="ja">
+<meta property="og:title" content="Claude Code / Codex ユーザーのための誰でもわかるHarness Engineeringベストプラクティス">
+<meta property="og:description" content="Coding Agent時代のハーネスエンジニアリングのベストプラクティスを、リポジトリ衛生・決定論的ツール・E2Eテスト戦略・プラットフォーム選定まで網羅的に解説します">
+<meta property="og:url" content="https://nyosegawa.github.io/posts/harness-engineering-best-practices-2026/">
+<meta property="og:image" content="https://nyosegawa.github.io/og/harness-engineering-best-practices-2026.png"><meta name="twitter:image" content="https://nyosegawa.github.io/og/harness-engineering-best-practices-2026.png"><meta property="og:image:type" content="image/png"><meta property="og:image:height" content="630"><meta property="og:image:width" content="1200">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@gyakuse">
+<meta name="description" content="Coding Agent時代のハーネスエンジニアリングのベストプラクティスを、リポジトリ衛生・決定論的ツール・E2Eテスト戦略・プラットフォーム選定まで網羅的に解説します">
+<meta name="generator" content="Lume 3.2.1">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>逆瀬川ちゃんのブログ</strong>
+      </a>
+
+      <ul class="navbar-links">        <li>
+          <a href="/archive/">
+            アーカイブ
+          </a>
+        </li>
+        <li>
+          <a href="">
+            
+          </a>
+        </li>
+      <li>
+        <script>
+          let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+          document.documentElement.dataset.theme = theme;
+          function changeTheme() {
+            theme = theme === "dark" ? "light" : "dark";
+            localStorage.setItem("theme", theme);
+            document.documentElement.dataset.theme = theme;
+          }
+        </script>
+        <button class="button" onclick="changeTheme()">
+          <span class="icon">◐</span>
+        </button>
+      </li>
+      </ul>
+    </nav>
+
+    <main class="body-post">
+      <article class="post" data-pagefind-body="" data-title="Claude Code / Codex ユーザーのための誰でもわかるHarness Engineeringベストプラクティス" data-pagefind-index-attrs="data-title">
+  <header class="post-header">
+    <h1 class="post-title">Claude Code / Codex ユーザーのための誰でもわかるHarness Engineeringベストプラクティス</h1>
+
+    <div class="post-details">
+      <p>by 逆瀬川ちゃん</p>
+
+  <p><time datetime="2026-03-09 00:00:00">2026-03-09</time></p>
+
+  <p>53 min read</p>
+
+  <div class="post-tags">
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/harness-engineering/">Harness Engineering</a>
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/ai-agent/">AI Agent</a>
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/claude-code/">Claude Code</a>
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/codex/">Codex</a>
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/testing/">Testing</a>
+
+        <a data-pagefind-filter="filter" class="badge" href="/archive/linter/">Linter</a>
+  </div>
+</div>
+
+  </header>
+
+  <nav class="toc">
+    <h2>目次</h2>
+    <ol>
+      <li>
+        <a href="#harness-engineering%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%8B">Harness Engineeringとは何か</a>
+
+        <ul>
+          <li>
+            <a href="#%E5%AE%9A%E7%BE%A9%E3%82%92%E8%BE%BF%E3%82%8B">定義を辿る</a>
+          </li>
+          <li>
+            <a href="#%E3%81%93%E3%81%AE%E5%88%86%E9%87%8E%E3%81%AE%E5%AF%BF%E5%91%BD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">この分野の寿命について</a>
+          </li>
+          <li>
+            <a href="#%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%B8%E3%81%AE%E6%8A%95%E8%B3%87%E3%81%AF%E8%A4%87%E5%88%A9%E3%81%A7%E5%8A%B9%E3%81%8F">ハーネスへの投資は複利で効く</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#1%3A-%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E8%A1%9B%E7%94%9F%3A-%E8%85%90%E6%95%97%E3%82%92%E5%89%8D%E6%8F%90%E3%81%AB%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B">1: リポジトリ衛生: 腐敗を前提に設計する</a>
+
+        <ul>
+          <li>
+            <a href="#%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE">置くべきもの</a>
+          </li>
+          <li>
+            <a href="#%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE">置くべきでないもの</a>
+          </li>
+          <li>
+            <a href="#%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E3%81%AE%E8%A1%9B%E7%94%9F%E7%AE%A1%E7%90%86">リポジトリの衛生管理</a>
+          </li>
+          <li>
+            <a href="#%E3%83%86%E3%82%B9%E3%83%88%E3%81%AF%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%82%88%E3%82%8A%E8%85%90%E6%95%97%E3%81%AB%E5%BC%B7%E3%81%84">テストはドキュメントより腐敗に強い</a>
+          </li>
+          <li>
+            <a href="#adr%E3%81%A7%E6%B1%BA%E5%AE%9A%E3%81%AE%E5%B1%A5%E6%AD%B4%E3%82%92%E4%BF%9D%E5%85%A8%E3%81%99%E3%82%8B">ADRで決定の履歴を保全する</a>
+          </li>
+          <li>
+            <a href="#%E7%8F%BE%E5%AE%9F%E7%9A%84%E3%81%AA%E8%A7%A3%E3%82%92%E8%BF%BD%E3%81%84%E6%B1%82%E3%82%81%E3%82%8B">現実的な解を追い求める</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#2%3A-%E6%B1%BA%E5%AE%9A%E8%AB%96%E7%9A%84%E3%83%84%E3%83%BC%E3%83%AB%E3%81%A8%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%A7%E5%93%81%E8%B3%AA%E3%82%92%E5%BC%B7%E5%88%B6%E3%81%99%E3%82%8B">2: 決定論的ツールとアーキテクチャガードレールで品質を強制する</a>
+
+        <ul>
+          <li>
+            <a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%81%AE%E4%BB%95%E4%BA%8B%E3%82%92llm%E3%81%AB%E3%81%95%E3%81%9B%E3%81%AA%E3%81%84">リンターの仕事をLLMにさせない</a>
+          </li>
+          <li>
+            <a href="#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%97%E3%81%AE%E8%A8%AD%E8%A8%88%3A-hooks%E3%81%AE%E6%B4%BB%E7%94%A8">フィードバックループの設計: Hooksの活用</a>
+          </li>
+          <li>
+            <a href="#4%E3%81%A4%E3%81%AEhook%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3">4つのHookパターン</a>
+          </li>
+          <li>
+            <a href="#%E5%AE%9F%E8%A3%85%E4%BE%8B%3A-posttooluse%E3%81%AB%E3%82%88%E3%82%8B%E8%87%AA%E5%8B%95%E3%83%AA%E3%83%B3%E3%83%88(typescript%2Fjavascript)">実装例: PostToolUseによる自動リント(TypeScript/JavaScript)</a>
+          </li>
+          <li>
+            <a href="#plankton%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3(%E9%AB%98%E5%BA%A6)">Planktonパターン(高度)</a>
+          </li>
+          <li>
+            <a href="#%E8%A8%80%E8%AA%9E%E5%88%A5%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E9%81%B8%E5%AE%9A%E3%82%AC%E3%82%A4%E3%83%89(2026%E5%B9%B43%E6%9C%88)">言語別リンター選定ガイド(2026年3月)</a>
+          </li>
+          <li>
+            <a href="#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E5%90%91%E3%81%91%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E8%A8%AD%E8%A8%88">カスタムリンター戦略: エージェント向けルールの設計</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%82%92%E4%BF%AE%E6%AD%A3%E6%8C%87%E7%A4%BA%E3%81%AB%E3%81%99%E3%82%8B">エラーメッセージを修正指示にする</a>
+          </li>
+          <li>
+            <a href="#%E3%83%97%E3%83%AA%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88%E3%83%95%E3%83%83%E3%82%AF%E3%81%A7%E5%8D%B3%E6%99%82%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%82%92%E6%8F%90%E4%BE%9B%E3%81%99%E3%82%8B">プリコミットフックで即時フィードバックを提供する</a>
+          </li>
+          <li>
+            <a href="#adr%E3%81%A8%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%AB%E3%83%BC%E3%83%AB%E3%82%92%E7%B5%90%E5%90%88%E3%81%99%E3%82%8B">ADRと実行可能ルールを結合する</a>
+          </li>
+          <li>
+            <a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E8%A8%AD%E5%AE%9A%E4%BF%9D%E8%AD%B7%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AE%E3%80%8C%E3%83%AB%E3%83%BC%E3%83%AB%E6%94%B9%E7%AB%84%E3%80%8D%E3%82%92%E9%98%B2%E3%81%90">リンター設定保護: エージェントの「ルール改竄」を防ぐ</a>
+          </li>
+          <li>
+            <a href="#ai%E7%94%9F%E6%88%90%E3%82%B3%E3%83%BC%E3%83%89%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%AA%E3%83%B3%E3%83%88%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3">AI生成コード固有のリントアンチパターン</a>
+          </li>
+          <li>
+            <a href="#%E8%A8%80%E8%AA%9E%E5%88%A5%E6%8E%A8%E5%A5%A8%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF">言語別推奨リンタースタック</a>
+          </li>
+          <li>
+            <a href="#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%81%AE%E9%80%9F%E5%BA%A6%E3%81%8C%E5%93%81%E8%B3%AA%E3%82%92%E6%B1%BA%E5%AE%9A%E3%81%99%E3%82%8B">フィードバックの速度が品質を決定する</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%92%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%AB%E3%81%99%E3%82%8B">アーキテクチャをガードレールにする</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#3%3A-agents.md-%2F-claude.md%E3%82%92%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%A8%E3%81%97%E3%81%A6%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B">3: AGENTS.md / CLAUDE.mdをポインタとして設計する</a>
+
+        <ul>
+          <li>
+            <a href="#%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE">書くべきもの</a>
+          </li>
+          <li>
+            <a href="#%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE">書くべきでないもの</a>
+          </li>
+          <li>
+            <a href="#%E3%82%B5%E3%82%A4%E3%82%BA%E3%81%AE%E7%9B%AE%E5%AE%89">サイズの目安</a>
+          </li>
+          <li>
+            <a href="#%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%8C%E8%85%90%E6%95%97%E3%81%97%E3%81%9F%E5%A0%B4%E5%90%88">ポインタが腐敗した場合</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#4%3A-%E8%A8%88%E7%94%BB%E3%81%A8%E5%AE%9F%E8%A1%8C%E3%82%92%E5%88%86%E9%9B%A2%E3%81%99%E3%82%8B">4: 計画と実行を分離する</a>
+
+        <ul>
+          <li>
+            <a href="#%E8%A8%88%E7%94%BB%E3%83%95%E3%82%A7%E3%83%BC%E3%82%BA">計画フェーズ</a>
+          </li>
+          <li>
+            <a href="#%E3%82%BF%E3%82%B9%E3%82%AF%E3%81%AE%E7%B2%92%E5%BA%A6">タスクの粒度</a>
+          </li>
+          <li>
+            <a href="#%E3%83%86%E3%82%B9%E3%83%88%E3%81%AB%E3%82%88%E3%82%8B%E5%AE%8C%E4%BA%86%E3%81%AE%E6%A4%9C%E8%A8%BC">テストによる完了の検証</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#5%3A-e2e%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AB%E3%81%82%E3%82%89%E3%82%86%E3%82%8B%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AE%E3%80%8C%E7%9B%AE%E3%80%8D%E3%82%92%E4%B8%8E%E3%81%88%E3%82%8B">5: E2Eテスト戦略: エージェントにあらゆるアプリの「目」を与える</a>
+
+        <ul>
+          <li>
+            <a href="#web%E3%82%A2%E3%83%97%E3%83%AA%3A-%E3%83%84%E3%83%BC%E3%83%AB%E6%AF%94%E8%BC%83(3%E3%81%A4%E3%81%AE%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81)">Webアプリ: ツール比較(3つのアプローチ)</a>
+          </li>
+          <li>
+            <a href="#%E6%99%AE%E9%81%8D%E7%9A%84%E5%8E%9F%E5%89%87%3A-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC%E3%81%AF%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%AB%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A7%E3%83%BC%E3%82%B9">普遍的原則: アクセシビリティツリーはユニバーサルインターフェース</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC-vs-%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%3A-%E4%BD%BF%E3%81%84%E5%88%86%E3%81%91">アクセシビリティツリー vs スクリーンショット: 使い分け</a>
+          </li>
+          <li>
+            <a href="#%E3%83%A2%E3%83%90%E3%82%A4%E3%83%AB%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88">モバイルアプリE2Eテスト</a>
+          </li>
+          <li>
+            <a href="#cli%2Ftui%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88">CLI/TUIアプリケーションE2Eテスト</a>
+          </li>
+          <li>
+            <a href="#api%2F%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89e2e%E3%83%86%E3%82%B9%E3%83%88">API/バックエンドE2Eテスト</a>
+          </li>
+          <li>
+            <a href="#%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88">デスクトップアプリE2Eテスト</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%82%B9%E3%83%88%E3%83%A9%E3%82%AF%E3%83%81%E3%83%A3%2Fdevops-e2e%E3%83%86%E3%82%B9%E3%83%88">インフラストラクチャ/DevOps E2Eテスト</a>
+          </li>
+          <li>
+            <a href="#ai%2Fml%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88">AI/MLパイプラインE2Eテスト</a>
+          </li>
+          <li>
+            <a href="#%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%ABe2e%E5%8E%9F%E5%89%87%E3%81%AE%E3%81%BE%E3%81%A8%E3%82%81">ユニバーサルE2E原則のまとめ</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%BB%E3%83%88%E3%83%A9%E3%83%B3%E3%82%B8%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%A4%9C%E8%A8%BC%E6%88%A6%E7%95%A5">アニメーション・トランジションの検証戦略</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#6%3A-%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E7%8A%B6%E6%85%8B%E7%AE%A1%E7%90%86%E3%82%92%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B">6: セッション間の状態管理を設計する</a>
+
+        <ul>
+          <li>
+            <a href="#%E5%95%8F%E9%A1%8C%E3%81%AE%E6%A7%8B%E9%80%A0">問題の構造</a>
+          </li>
+          <li>
+            <a href="#%E8%B5%B7%E5%8B%95%E3%83%AB%E3%83%BC%E3%83%81%E3%83%B3%E3%82%92%E6%A8%99%E6%BA%96%E5%8C%96%E3%81%99%E3%82%8B">起動ルーチンを標準化する</a>
+          </li>
+          <li>
+            <a href="#git%E3%82%92%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E3%83%96%E3%83%AA%E3%83%83%E3%82%B8%E3%81%A8%E3%81%97%E3%81%A6%E4%BD%BF%E3%81%86">Gitをセッション間のブリッジとして使う</a>
+          </li>
+          <li>
+            <a href="#%E9%80%B2%E6%8D%97%E8%A8%98%E9%8C%B2%E3%81%ABjson%E3%82%92%E4%BD%BF%E3%81%86">進捗記録にJSONを使う</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#7%3A-%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%88%A6%E7%95%A5%E3%82%92%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B%3A-codex-vs-claude-code">7: プラットフォーム固有のハーネス戦略を理解する: Codex vs Claude Code</a>
+
+        <ul>
+          <li>
+            <a href="#%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%8C%E3%83%A2%E3%83%87%E3%83%AB%E3%82%88%E3%82%8A%E9%87%8D%E8%A6%81">ハーネスがモデルより重要</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%81%AE%E6%A0%B9%E6%9C%AC%E7%9A%84%E9%81%95%E3%81%84">アーキテクチャの根本的違い</a>
+          </li>
+          <li>
+            <a href="#codex%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD">Codex固有のハーネス機能</a>
+          </li>
+          <li>
+            <a href="#claude-code%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD">Claude Code固有のハーネス機能</a>
+          </li>
+          <li>
+            <a href="#%E4%B8%A1%E6%96%B9%E3%81%A7%E5%8F%AF%E8%83%BD%E3%81%A0%E3%81%8C%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81%E3%81%8C%E7%95%B0%E3%81%AA%E3%82%8B%E3%82%82%E3%81%AE">両方で可能だがアプローチが異なるもの</a>
+          </li>
+          <li>
+            <a href="#%E3%83%8F%E3%82%A4%E3%83%96%E3%83%AA%E3%83%83%E3%83%89%E6%88%A6%E7%95%A5%3A-%E8%A8%88%E7%94%BB%E3%81%AFclaude-code%E3%80%81%E5%AE%9F%E8%A1%8C%E3%81%AFcodex">ハイブリッド戦略: 計画はClaude Code、実行はCodex</a>
+          </li>
+          <li>
+            <a href="#%E6%84%8F%E6%80%9D%E6%B1%BA%E5%AE%9A%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF">意思決定フレームワーク</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3">アンチパターン</a>
+
+      </li>
+      <li>
+        <a href="#%E6%9C%80%E5%B0%8F%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9(mvh%3A-minimum-viable-harness)">最小実行可能ハーネス(MVH: Minimum Viable Harness)</a>
+
+        <ul>
+          <li>
+            <a href="#week-1">Week 1</a>
+          </li>
+          <li>
+            <a href="#week-2-4">Week 2-4</a>
+          </li>
+          <li>
+            <a href="#month-2-3">Month 2-3</a>
+          </li>
+          <li>
+            <a href="#month-3%2B">Month 3+</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#%E3%81%BE%E3%81%A8%E3%82%81-1">まとめ</a>
+
+      </li>
+      <li>
+        <a href="#2026-03-11-%E4%BF%AE%E6%AD%A3">2026-03-11 修正</a>
+
+      </li>
+      <li>
+        <a href="#references">References</a>
+
+        <ul>
+          <li>
+            <a href="#%E4%B8%80%E6%AC%A1%E3%82%BD%E3%83%BC%E3%82%B9">一次ソース</a>
+          </li>
+          <li>
+            <a href="#claude-code-%2F-codex">Claude Code / Codex</a>
+          </li>
+          <li>
+            <a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%84%E3%83%BC%E3%83%AB">リンターツール</a>
+          </li>
+          <li>
+            <a href="#e2e%E3%83%86%E3%82%B9%E3%83%88">E2Eテスト</a>
+          </li>
+          <li>
+            <a href="#%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9-%2F-devops">インフラ / DevOps</a>
+          </li>
+          <li>
+            <a href="#ai%2Fml">AI/ML</a>
+          </li>
+          <li>
+            <a href="#%E3%81%9D%E3%81%AE%E4%BB%96">その他</a>
+          </li>
+        </ul>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="post-body body">
+    <p>こんにちは！逆瀬川ちゃん (<a href="https://x.com/gyakuse" target="_blank" rel="noopener noreferrer">@gyakuse</a>) です！</p>
+<p>今日はHarness Engineering(ハーネスエンジニアリング)について、2026年3月時点のベストプラクティスを徹底的にまとめていきたいと思います。</p>
+<!--more-->
+<h2 id="harness-engineering%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%8B" tabindex="-1"><a href="#harness-engineering%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%8B" class="header-anchor">Harness Engineeringとは何か</a></h2>
+<h3 id="%E5%AE%9A%E7%BE%A9%E3%82%92%E8%BE%BF%E3%82%8B" tabindex="-1"><a href="#%E5%AE%9A%E7%BE%A9%E3%82%92%E8%BE%BF%E3%82%8B" class="header-anchor">定義を辿る</a></h3>
+<p><a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noopener noreferrer">Mitchell Hashimoto</a>による最初の定義を辿れば、Harness Engineeringとは人間によるAGENTS.mdの継続的改善と、Agentが自分の作業の正誤を自己検証するためのツール群を指していました。</p>
+<p>現在はより大きい概念として語られることが多く、一言で言えばCoding Agentをできるだけ人間の介入なしに自律的に稼働させ、出力を安定させるためのものを指します。簡単に言えばCoding Agentの補助輪のようなものです。モデルではなくシステムが重要であり、同じモデルでもハーネスを変えるだけで劇的に結果が変わります。</p>
+<p>エンジニアの仕事は「正しいコードを生産すること」から「エージェントが正しいコードを確実に生産する環境を設計すること」に移行しています。</p>
+<h3 id="%E3%81%93%E3%81%AE%E5%88%86%E9%87%8E%E3%81%AE%E5%AF%BF%E5%91%BD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6" tabindex="-1"><a href="#%E3%81%93%E3%81%AE%E5%88%86%E9%87%8E%E3%81%AE%E5%AF%BF%E5%91%BD%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6" class="header-anchor">この分野の寿命について</a></h3>
+<p>ところで、理想のCoding Agentを考えたとき、Harnessはほとんど必要なくなっていく未来が想像できます。Harnessが必要なのは現状のLLMの能力やCoding Agentとしての不完全性から生まれていることに注意しなければなりません。</p>
+<p>Harness Engineeringが数カ月後にはとくに重要でない分野になっている可能性はあります。Coding Agent自体に還元され、個々の開発者や組織が意識しなくても良い状態になっているかもしれませんし、LLMの能力が向上しHarness群自体が(あるいはHarness群の一部かもしれませんが)不要になっている可能性もあります。</p>
+<p>数カ月か長く見積もって1年程度寝ていれば解決される問題群かもしれません。しかし2026年3月現在を生きる我々にとっては重要な分野であることには間違いありません。</p>
+<h3 id="%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%B8%E3%81%AE%E6%8A%95%E8%B3%87%E3%81%AF%E8%A4%87%E5%88%A9%E3%81%A7%E5%8A%B9%E3%81%8F" tabindex="-1"><a href="#%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%B8%E3%81%AE%E6%8A%95%E8%B3%87%E3%81%AF%E8%A4%87%E5%88%A9%E3%81%A7%E5%8A%B9%E3%81%8F" class="header-anchor">ハーネスへの投資は複利で効く</a></h3>
+<p>ハーネスへの投資は複利で効きます。リンタールールを1つ追加すれば以降すべてのセッションでそのミスが防がれ、テストを1つ追加すれば以降すべてのセッションでその回帰が検出されます。</p>
+<p>この記事では7つのトピック、アンチパターン、そして明日から始められる最小実行可能ハーネス(MVH)までを網羅的に解説していきます。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/harness-overview.png" alt="ハーネスエンジニアリングの全体像"></p>
+<h2 id="1%3A-%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E8%A1%9B%E7%94%9F%3A-%E8%85%90%E6%95%97%E3%82%92%E5%89%8D%E6%8F%90%E3%81%AB%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" tabindex="-1"><a href="#1%3A-%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E8%A1%9B%E7%94%9F%3A-%E8%85%90%E6%95%97%E3%82%92%E5%89%8D%E6%8F%90%E3%81%AB%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" class="header-anchor">1: リポジトリ衛生: 腐敗を前提に設計する</a></h2>
+<p>エージェント(Claude Code, Codex等)はリポジトリ内をgrep・find・catで自由に走査し、発見したテキストを等しく権威的な情報源として扱います。エージェントには「これは3ヶ月前のメモで今は古い」という直感がありません。したがってリポジトリ内のあらゆるテキストの鮮度が問われます。</p>
+<h3 id="%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE" tabindex="-1"><a href="#%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE" class="header-anchor">置くべきもの</a></h3>
+<p>リポジトリに置くべきは実行可能なアーティファクトです。コード、テスト、リンター設定、型定義、スキーマ定義、CI設定。これらは「正しいか間違いか」が機械的に判定でき、腐敗すれば実行時に検出されます。</p>
+<p>もう一つ置くべきはArchitecture Decision Records(ADR)です。ADRは「ある時点でこの決定をした、理由はこうだった」を記録するものであり、内容を書き換えず置換(supersede)します。タイムスタンプとステータス(Accepted / Superseded / Deprecated)が明示されているため、エージェントは構造的に有効性を判断できます。</p>
+<h3 id="%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE" tabindex="-1"><a href="#%E7%BD%AE%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE" class="header-anchor">置くべきでないもの</a></h3>
+<p>逆に「現在のシステムはこうなっている」という説明文書、設計概要、手書きのAPI説明、アーキテクチャ概要図の説明テキストは置くべきではありません。これらは必然的にコードの進化に追いつけず腐敗し、エージェントが腐敗した情報を真実として採用するリスクを生みます。</p>
+<p><a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">OpenAIチームの教訓</a>「エージェントにとってコンテキスト内でアクセスできないものは存在しない」の裏返しとして、「エージェントにとってリポジトリ内で発見できる古い情報は、最新の真実と区別できない」という問題があります。<a href="https://www.morphllm.com/context-rot" target="_blank" rel="noopener noreferrer">Chromaの研究</a>では18のフロンティアモデル全てでコンテキスト長の増加に伴い性能が低下することが確認されており、無関係・古い情報をリポジトリに残すこと自体が性能劣化の原因になります。</p>
+<h3 id="%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E3%81%AE%E8%A1%9B%E7%94%9F%E7%AE%A1%E7%90%86" tabindex="-1"><a href="#%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E3%81%AE%E8%A1%9B%E7%94%9F%E7%AE%A1%E7%90%86" class="header-anchor">リポジトリの衛生管理</a></h3>
+<p>OpenAIチームはエージェントがリポジトリ内の既存パターンを(不均一・非最適なパターンも含めて)複製することを発見しました。当初は毎週金曜日(週の20%)をAIスロップ掃除に費やしましたが、スケールしませんでした。</p>
+<p>解決策は「ゴールデンプリンシプル」をリポジトリ内にエンコードし、意見を持った機械的ルールとして強制することです。ガベージコレクションエージェント(バックグラウンドで逸脱を検知しリファクタリングPRを開くCodexタスク)を定期実行します。</p>
+<p>ただし注意が必要です。ガベージコレクションエージェント自身がコンテキスト腐敗の影響を受ける再帰的リスクがあります。検査基準は決定論的ルール(リンター、型チェック、構造テスト)に依拠させ、エージェントの「判断」に頼らないようにしましょう。</p>
+<h3 id="%E3%83%86%E3%82%B9%E3%83%88%E3%81%AF%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%82%88%E3%82%8A%E8%85%90%E6%95%97%E3%81%AB%E5%BC%B7%E3%81%84" tabindex="-1"><a href="#%E3%83%86%E3%82%B9%E3%83%88%E3%81%AF%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%82%88%E3%82%8A%E8%85%90%E6%95%97%E3%81%AB%E5%BC%B7%E3%81%84" class="header-anchor">テストはドキュメントより腐敗に強い</a></h3>
+<p>テストは実行すれば嘘をつけません。「この機能はこう動く」という記述ドキュメントは腐敗しますが、「この機能がこう動くことを検証するテスト」は壊れれば赤くなります。可能な限り、仕様・期待動作・制約はテストとして表現しましょう。</p>
+<p><a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noopener noreferrer">Mitchell Hashimoto</a>の知見ですが、エージェントは「ゴール指向」であり、現在のタスクスコープ外のものを壊してでも直近の目標を達成しようとします。人間のみの開発で十分だったテストカバレッジは、エージェントとの開発では不十分です。エージェントのミスが発生するたびにそれを防ぐテストを追加します。一度追加したテストはすべての将来のエージェントセッションに適用されます。</p>
+<h3 id="adr%E3%81%A7%E6%B1%BA%E5%AE%9A%E3%81%AE%E5%B1%A5%E6%AD%B4%E3%82%92%E4%BF%9D%E5%85%A8%E3%81%99%E3%82%8B" tabindex="-1"><a href="#adr%E3%81%A7%E6%B1%BA%E5%AE%9A%E3%81%AE%E5%B1%A5%E6%AD%B4%E3%82%92%E4%BF%9D%E5%85%A8%E3%81%99%E3%82%8B" class="header-anchor">ADRで決定の履歴を保全する</a></h3>
+<p>ADRの<a href="https://adr.github.io/" target="_blank" rel="noopener noreferrer">不変原則</a>により、エージェントがgrepで発見しても安全です。過去の決定が置換された場合はステータスで明示されるため、エージェントは現在有効な決定を構造的に判別できます。</p>
+<h3 id="%E7%8F%BE%E5%AE%9F%E7%9A%84%E3%81%AA%E8%A7%A3%E3%82%92%E8%BF%BD%E3%81%84%E6%B1%82%E3%82%81%E3%82%8B" tabindex="-1"><a href="#%E7%8F%BE%E5%AE%9F%E7%9A%84%E3%81%AA%E8%A7%A3%E3%82%92%E8%BF%BD%E3%81%84%E6%B1%82%E3%82%81%E3%82%8B" class="header-anchor">現実的な解を追い求める</a></h3>
+<p>それでもREADME.mdは欲しいです。docsにドキュメントがあると嬉しい。エージェントにとってはテストとADRがあればほとんど事足りるので、もしかしたらgrep・find・catで走査できる範囲外に (たとえば別のリポジトリや別のシステムにおいて) ドキュメントは管理するべきなのかもしれません。</p>
+<p>さて、リポジトリを清潔に保つことの重要性は理解できました。では具体的に、エージェントの出力品質をどうやって機械的に強制していくのでしょうか。</p>
+<h2 id="2%3A-%E6%B1%BA%E5%AE%9A%E8%AB%96%E7%9A%84%E3%83%84%E3%83%BC%E3%83%AB%E3%81%A8%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%A7%E5%93%81%E8%B3%AA%E3%82%92%E5%BC%B7%E5%88%B6%E3%81%99%E3%82%8B" tabindex="-1"><a href="#2%3A-%E6%B1%BA%E5%AE%9A%E8%AB%96%E7%9A%84%E3%83%84%E3%83%BC%E3%83%AB%E3%81%A8%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%A7%E5%93%81%E8%B3%AA%E3%82%92%E5%BC%B7%E5%88%B6%E3%81%99%E3%82%8B" class="header-anchor">2: 決定論的ツールとアーキテクチャガードレールで品質を強制する</a></h2>
+<h3 id="%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%81%AE%E4%BB%95%E4%BA%8B%E3%82%92llm%E3%81%AB%E3%81%95%E3%81%9B%E3%81%AA%E3%81%84" tabindex="-1"><a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%81%AE%E4%BB%95%E4%BA%8B%E3%82%92llm%E3%81%AB%E3%81%95%E3%81%9B%E3%81%AA%E3%81%84" class="header-anchor">リンターの仕事をLLMにさせない</a></h3>
+<p><a href="https://www.humanlayer.dev/blog/writing-a-good-claude-md" target="_blank" rel="noopener noreferrer">HumanLayer</a>の原則がシンプルに要点を突いています。「LLMは従来のリンターやフォーマッターと比較して高価で遅い。決定論的ツールが使える場面では常にそちらを使うべきだ。」</p>
+<p>リンター・フォーマッター・型チェッカー・構造テストは腐敗しません。設定が変わればCIが壊れるので即座に検出されます。エージェントの出力品質をプロンプトの指示だけに頼るのではなく、機械的な強制に委ねることで信頼性が複利的に向上します。</p>
+<p>CLAUDE.mdに「リンターを実行せよ」と書くことと、Hookでリンターを実行することの間には「ほぼ毎回」と「例外なく毎回」の差があります。この差はプロダクションシステムでは致命的になります。セッション47回目の長いデバッグチェーンでコンテキストウィンドウの大半を消費した後、エージェントはファイルを書いて次に進みます。リンターは忘れ去られます。</p>
+<h3 id="%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%97%E3%81%AE%E8%A8%AD%E8%A8%88%3A-hooks%E3%81%AE%E6%B4%BB%E7%94%A8" tabindex="-1"><a href="#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%97%E3%81%AE%E8%A8%AD%E8%A8%88%3A-hooks%E3%81%AE%E6%B4%BB%E7%94%A8" class="header-anchor">フィードバックループの設計: Hooksの活用</a></h3>
+<p><a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener noreferrer">Claude Code Hooks</a>は、エージェントのライフサイクルの特定ポイントで自動実行されるシェルコマンド・プロンプト・サブエージェントです。Gitフックがgit操作のbefore/afterで走るように、Claude Code HooksはClaude Codeのあらゆるアクション(ファイル書き込み、bash実行、エージェント判断)のbefore/afterで走ります。</p>
+<p>以下で扱う実装例はすべて<code>.claude/settings.json</code>または<code>.claude/settings.local.json</code>に記述するsettings-based hooksを前提とします。agent/skillのfrontmatter hooksは別の挙動差があるため、この記事では主対象にしません。</p>
+<p>最も強力なパターンは品質フィードバックループです。</p>
+<ol>
+<li>エージェントがコードを書く(PostToolUseイベント発火)</li>
+<li>Hookがリンター・型チェッカー・テストスイートを自動実行する</li>
+<li>エラーが検出されればdocs準拠のJSONをstdoutに返し、その中の<code>hookSpecificOutput.additionalContext</code>がエージェントのコンテキストに注入される</li>
+<li>エージェントが次のアクションでエラーを自己修正する</li>
+<li>人間の介入なしにこのループがファイル書き込みのたびに繰り返される</li>
+</ol>
+<p>ここで重要なのは、PostToolUse Hookが通常のstdoutをそのまま出力するだけでは<code>additionalContext</code>として扱われないことです。フィードバック注入を行うには、Hookが<code>hookSpecificOutput.additionalContext</code>を含むJSONを返す必要があります。</p>
+<p>handler.tsの42行目、78行目、103行目にTypeScriptエラー3件、のようなフィードバックをJSONで注入するHookは、単にアクションをブロックするHookよりも劇的に有用です。ブロックは処理を止めるだけですが、フィードバック注入は修正まで進ませます。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/hooks-feedback-loop.png" alt="Hooksフィードバックループ"></p>
+<h3 id="4%E3%81%A4%E3%81%AEhook%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" tabindex="-1"><a href="#4%E3%81%A4%E3%81%AEhook%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" class="header-anchor">4つのHookパターン</a></h3>
+<ul>
+<li>Safety Gates(PreToolUse): 破壊的コマンド(<code>rm -rf</code>、<code>drop table</code>)のブロック、機密ファイル(<code>.env</code>)の編集禁止。Exit 2でブロックし、stderrの理由がエージェントにフィードバックされる</li>
+<li>Quality Loops(PostToolUse): ファイル編集後のリンター・フォーマッター・テスト自動実行。結果を<code>hookSpecificOutput.additionalContext</code>として注入し、エージェントの自己修正を駆動する</li>
+<li>Completion Gates(Stop): エージェントが完了を宣言した際のテスト実行による検証。テストが通るまでエージェントを止めさせない。ただし<code>stop_hook_active</code>フラグをチェックして無限ループを防ぐこと</li>
+<li>Observability(全イベント): PreToolUseでエージェントの意図、PostToolUseで結果、PreCompactで失われるコンテキストを監視パイプラインに流す</li>
+</ul>
+<h3 id="%E5%AE%9F%E8%A3%85%E4%BE%8B%3A-posttooluse%E3%81%AB%E3%82%88%E3%82%8B%E8%87%AA%E5%8B%95%E3%83%AA%E3%83%B3%E3%83%88(typescript%2Fjavascript)" tabindex="-1"><a href="#%E5%AE%9F%E8%A3%85%E4%BE%8B%3A-posttooluse%E3%81%AB%E3%82%88%E3%82%8B%E8%87%AA%E5%8B%95%E3%83%AA%E3%83%B3%E3%83%88(typescript%2Fjavascript)" class="header-anchor">実装例: PostToolUseによる自動リント(TypeScript/JavaScript)</a></h3>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-ts-lint.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<pre class="language-bash" tabindex="0"><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+
+input="$(cat)"
+file="$(jq -r '.tool_input.file_path // .tool_input.path // empty' &lt;&lt;&lt; "$input")"
+
+case "$file" in
+  *.ts|*.tsx|*.js|*.jsx) ;;
+  *) exit 0 ;;
+esac
+
+npx biome format --write "$file" &gt;/dev/null 2&gt;&amp;1 || true
+npx oxlint --fix "$file" &gt;/dev/null 2&gt;&amp;1 || true
+diag="$(npx oxlint "$file" 2&gt;&amp;1 | head -20)"
+
+if [ -n "$diag" ]; then
+  jq -Rn --arg msg "$diag" '{
+    hookSpecificOutput: {
+      hookEventName: "PostToolUse",
+      additionalContext: $msg
+    }
+  }'
+fi
+</code></pre>
+<p>この例の要点は2つです。1つ目は自動修正(<code>biome format</code>、<code>oxlint --fix</code>)を先に行い、残った違反だけをClaudeに返すこと。2つ目はフィードバックを通常stdoutではなく<code>hookSpecificOutput.additionalContext</code>を含むJSONで返すことです。</p>
+<p>Python、Go、Rustでも同じ形で書けます。先に高速な自動修正を実行し、残った違反だけを<code>additionalContext</code>として返します。</p>
+<p>2026年3月時点ではESLint+PrettierよりもOxlint+Biome(TypeScript)、Ruff(Python)、gofumpt+golangci-lint(Go)の方がPostToolUse Hookに適します。理由は速度です。PostToolUse Hookはミリ秒〜秒単位で完了する必要があり、Rust製ツールはNode.js製ツールより50〜100倍高速です。</p>
+<h3 id="plankton%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3(%E9%AB%98%E5%BA%A6)" tabindex="-1"><a href="#plankton%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3(%E9%AB%98%E5%BA%A6)" class="header-anchor">Planktonパターン(高度)</a></h3>
+<p><a href="https://github.com/affaan-m/everything-claude-code" target="_blank" rel="noopener noreferrer">Planktonパターン</a>はPostToolUseフックでフォーマッターと20以上のリンターを実行し、残った違反を構造化JSONとして収集します。違反の複雑さに応じてHaiku/Sonnet/Opusにルーティングされたサブプロセスが修正を行います。</p>
+<p>3フェーズで動作します。(1) サイレントな自動フォーマット(40-50%の問題を解消) → (2) 残りの違反を構造化JSON化 → (3) サブプロセスに修正を委任。重要な防御策として、エージェントがリンター設定を変更してテストをパスさせようとする行為を防ぐconfig protectionフックも含みます。</p>
+<h3 id="%E8%A8%80%E8%AA%9E%E5%88%A5%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E9%81%B8%E5%AE%9A%E3%82%AC%E3%82%A4%E3%83%89(2026%E5%B9%B43%E6%9C%88)" tabindex="-1"><a href="#%E8%A8%80%E8%AA%9E%E5%88%A5%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E9%81%B8%E5%AE%9A%E3%82%AC%E3%82%A4%E3%83%89(2026%E5%B9%B43%E6%9C%88)" class="header-anchor">言語別リンター選定ガイド(2026年3月)</a></h3>
+<p>PostToolUse Hookでの利用を前提に、速度・自動修正能力・カスタムルール対応の3軸で厳選します。</p>
+<h4 id="typescript%2Fjavascript%3A-oxlint(%E3%83%AA%E3%83%B3%E3%83%88)%2B-biome(%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%83%E3%83%88)" tabindex="-1"><a href="#typescript%2Fjavascript%3A-oxlint(%E3%83%AA%E3%83%B3%E3%83%88)%2B-biome(%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%83%E3%83%88)" class="header-anchor">TypeScript/JavaScript: Oxlint(リント)+ Biome(フォーマット)</a></h4>
+<p><a href="https://voidzero.dev/posts/announcing-oxlint-1-stable" target="_blank" rel="noopener noreferrer">Oxlint</a>はVoidZero(Viteチーム)が開発するRust製リンターです。2025年6月にv1.0安定版がリリースされました。ESLintの50〜100倍高速で、Shopifyのリントが75分→10秒に短縮されました。520以上のESLint互換ルールを搭載し、JavaScriptプラグインシステムにより既存ESLintプラグインが最小限の修正で動作します。Shopify、Airbnb、Mercedes-Benz、Linear、Framerが本番採用しています。</p>
+<p><a href="https://biomejs.dev/blog/biome-v2/" target="_blank" rel="noopener noreferrer">Biome</a>はRust製の統合リント＋フォーマッターです。ESLint+Prettierの10〜25倍高速。v2.0(2025年6月)でGritQLプラグインによるカスタムルールに対応し、v2.1+でドメイン別設定(React、Next.js、テスト)を搭載しています。</p>
+<p>使い分けとしてはPostToolUse HookではOxlintでリント → Biomeでフォーマット。ESLintはPostToolUseには遅すぎますが、カスタムアーキテクチャルールのためにプリコミットフック・CIで残す価値があります。</p>
+<h4 id="python%3A-ruff(%E4%B8%80%E6%8A%9E)" tabindex="-1"><a href="#python%3A-ruff(%E4%B8%80%E6%8A%9E)" class="header-anchor">Python: Ruff(一択)</a></h4>
+<p><a href="https://github.com/astral-sh/ruff" target="_blank" rel="noopener noreferrer">Ruff</a>はRust製です。Flake8、isort、pyupgrade、pydocstyle、Blackの全機能を一つのバイナリに統合しています。900以上のルール。大規模コードベースでもPostToolUse Hookで秒以下で完了します。</p>
+<p>制約としてはカスタムルールの追加ができません。アーキテクチャ境界の強制にはast-grepまたはpylintのカスタムチェッカーを併用する必要があります。</p>
+<h4 id="go%3A-golangci-lint" tabindex="-1"><a href="#go%3A-golangci-lint" class="header-anchor">Go: golangci-lint</a></h4>
+<p><a href="https://golangci-lint.run/" target="_blank" rel="noopener noreferrer">golangci-lint</a>は50以上のリンターを並列実行するメタリンターです。キャッシュにより大規模コードベースでも秒単位で完了します。<code>--fix</code>フラグで35リンターの自動修正に対応しています。Kubernetes、Prometheus、Terraformが採用しています。</p>
+<p>推奨有効リンター: staticcheck、gosec、errcheck、revive、govet、gofumpt、gci、modernize。</p>
+<h4 id="rust%3A-clippy(pedantic-%2B-allow_attributes%E7%A6%81%E6%AD%A2)" tabindex="-1"><a href="#rust%3A-clippy(pedantic-%2B-allow_attributes%E7%A6%81%E6%AD%A2)" class="header-anchor">Rust: Clippy(pedantic + allow_attributes禁止)</a></h4>
+<p><a href="https://github.com/vicnaum/rust-magic-linter" target="_blank" rel="noopener noreferrer">rust-magic-linterパターン</a>では<code>Cargo.toml</code>でpedantic clippyを有効化し、<code>allow_attributes = "deny"</code>でエージェントが<code>#[allow(clippy::...)]</code>でリントを黙らせることを構造的に不可能にします。</p>
+<pre class="language-toml" tabindex="0"><code class="language-toml">[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+allow_attributes = "deny"
+dbg_macro = "deny"
+</code></pre>
+<h4 id="swift-%2F-kotlin" tabindex="-1"><a href="#swift-%2F-kotlin" class="header-anchor">Swift / Kotlin</a></h4>
+<p><a href="https://github.com/realm/SwiftLint" target="_blank" rel="noopener noreferrer">SwiftLint</a>は200以上のルール、正規表現・ASTベースのカスタムルール、<code>--autocorrect</code>対応です。<a href="https://github.com/detekt/detekt" target="_blank" rel="noopener noreferrer">detekt</a>はKotlinの静的解析。ktfmtはktlintより40%高速なフォーマッターです。</p>
+<h4 id="%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E6%AF%94%E8%BC%83%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB" tabindex="-1"><a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E6%AF%94%E8%BC%83%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB" class="header-anchor">リンター比較テーブル</a></h4>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>言語</th>
+<th>ESLint比速度</th>
+<th>カスタムルール</th>
+<th>自動修正</th>
+<th>PostToolUse適性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oxlint</td>
+<td>JS/TS</td>
+<td>50-100x</td>
+<td>JSプラグイン(ESLint互換)</td>
+<td>Yes</td>
+<td>最適</td>
+</tr>
+<tr>
+<td>Biome</td>
+<td>JS/TS/JSON/CSS</td>
+<td>10-25x</td>
+<td>GritQLプラグイン</td>
+<td>Yes(lint+format)</td>
+<td>良好</td>
+</tr>
+<tr>
+<td>Ruff</td>
+<td>Python</td>
+<td>10-100x vs Flake8</td>
+<td>不可</td>
+<td>Yes</td>
+<td>最適</td>
+</tr>
+<tr>
+<td>golangci-lint</td>
+<td>Go</td>
+<td>-</td>
+<td>サブリンター経由</td>
+<td>35リンター</td>
+<td>良好</td>
+</tr>
+<tr>
+<td>Clippy</td>
+<td>Rust</td>
+<td>-</td>
+<td>なし</td>
+<td>一部</td>
+<td>良好</td>
+</tr>
+<tr>
+<td>ast-grep</td>
+<td>多言語</td>
+<td>-</td>
+<td>YAML+JSパターン</td>
+<td>Yes(rewrite)</td>
+<td>カスタムルール用</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E5%90%91%E3%81%91%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E8%A8%AD%E8%A8%88" tabindex="-1"><a href="#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E5%90%91%E3%81%91%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E8%A8%AD%E8%A8%88" class="header-anchor">カスタムリンター戦略: エージェント向けルールの設計</a></h3>
+<h4 id="factory.ai%E3%81%AE4%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA" tabindex="-1"><a href="#factory.ai%E3%81%AE4%E3%82%AB%E3%83%86%E3%82%B4%E3%83%AA" class="header-anchor">Factory.aiの4カテゴリ</a></h4>
+<p><a href="https://factory.ai/news/using-linters-to-direct-agents" target="_blank" rel="noopener noreferrer">Factory.ai</a>がオープンソースで公開したeslint-pluginは、エージェント向けリントルールを4カテゴリに分類しています。</p>
+<ol>
+<li>Grep-ability(検索容易性): デフォルトエクスポートよりnamed exportを強制。一貫したエラー型と明示的なDTO。エージェントがコードベースをgrepで走査する際の命中精度を高める</li>
+<li>Glob-ability(配置予測可能性): ファイル構造を予測可能に保つ。エージェントがファイルを確実に配置・発見・リファクタリングできるようにする</li>
+<li>アーキテクチャ境界: クロスレイヤーのインポートをブロック。ドメイン固有のallowlist/denylistで依存方向を強制</li>
+<li>セキュリティ/プライバシー: 平文シークレットのブロック、入力スキーマのバリデーション強制、<code>eval</code>/<code>new Function</code>の禁止</li>
+</ol>
+<h4 id="%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E5%AE%9F%E8%A3%85%E3%83%84%E3%83%BC%E3%83%AB%E9%81%B8%E5%AE%9A" tabindex="-1"><a href="#%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%83%AB%E3%83%BC%E3%83%AB%E3%81%AE%E5%AE%9F%E8%A3%85%E3%83%84%E3%83%BC%E3%83%AB%E9%81%B8%E5%AE%9A" class="header-anchor">カスタムルールの実装ツール選定</a></h4>
+<p>TypeScript/JavaScriptでは<a href="https://github.com/cletusw/eslint-plugin-local-rules" target="_blank" rel="noopener noreferrer">eslint-plugin-local-rules</a>でリポジトリ内にプロジェクト固有ルールを配置できます(npm公開不要)。ESLintのビジターパターンでAST走査し、<code>meta.messages</code>にエージェント向け修正指示を記述します。</p>
+<p>多言語対応では<a href="https://ast-grep.github.io/" target="_blank" rel="noopener noreferrer">ast-grep</a>がベストです。コードと同型のパターン(正規表現ではなくコードのように見える構文パターン)でルールを定義します。YAML定義とJavaScript APIの両方をサポートし、Python、Go、Rust、TypeScript等の主要言語に対応しています。</p>
+<p>AST(抽象構文木)ベースのルールは正規表現ベースのルールより劇的に信頼性が高いです。正規表現はコメントや文字列リテラル内のマッチでフォールスポジティブを生みます。ファイル名・インポートパスの単純チェック以外は常にASTベースを使いましょう。</p>
+<h3 id="%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%82%92%E4%BF%AE%E6%AD%A3%E6%8C%87%E7%A4%BA%E3%81%AB%E3%81%99%E3%82%8B" tabindex="-1"><a href="#%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%82%92%E4%BF%AE%E6%AD%A3%E6%8C%87%E7%A4%BA%E3%81%AB%E3%81%99%E3%82%8B" class="header-anchor">エラーメッセージを修正指示にする</a></h3>
+<p><a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">OpenAIチームの最も巧みな手法</a>がこれです。カスタムリンターのエラーメッセージが違反を指摘するだけでなく修正方法もエージェントに伝えます。ツールがエージェントを「教育」しながら動作します。これによりルール違反のたびに人間が介入する必要がなくなります。</p>
+<p>すべてのカスタムリンターのエラーメッセージは以下の構造に従うべきです。</p>
+<pre class="language-none" tabindex="0"><code class="language-none">ERROR: [何が間違っているか]
+  [どのファイル:行番号]
+  WHY: [なぜこのルールがあるか、ADRへのリンク]
+  FIX: [具体的な修正手順、コード例があれば含む]
+  EXAMPLE:
+    // Bad:
+    import { db } from '../infra/database';
+    // Good:
+    import { DatabaseProvider } from '../domain/providers';
+</code></pre>
+<p>具体例をいくつか挙げます。</p>
+<ul>
+<li>依存方向違反(OpenAIパターン): 「ServiceAはInfrastructureレイヤーに直接依存できません。ProviderインターフェースをDomain層(src/domain/providers/)に定義し、Infrastructure層(src/infra/providers/)で実装してください(ADR-007参照)」</li>
+<li><a href="https://understandingdata.com/posts/custom-eslint-rules-determinism/" target="_blank" rel="noopener noreferrer">DTOコロケーション違反</a>: 「インラインZodスキーマは許可されていません。DTOはsrc/dtos/[domain]/[action].dto.tsに配置してください」</li>
+<li><a href="https://medium.com/@montes.makes/lint-against-the-machine-a-field-guide-to-catching-ai-coding-agent-anti-patterns-3c4ef7baeb9e" target="_blank" rel="noopener noreferrer">TypeScript any使用</a>: 「<code>any</code>型の使用は禁止です。正しい型が不明な場合は<code>unknown</code>を使い、型ガードで絞り込んでください。AIエージェントは型推論に失敗すると<code>any</code>に逃げる傾向があります」</li>
+</ul>
+<p>核心的な洞察として、エージェントはリンターのエラーメッセージを無視できません(CIが通らない)が、ドキュメントは無視できます。したがってルールのドキュメントはエラーメッセージの中に書くのです。</p>
+<h3 id="%E3%83%97%E3%83%AA%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88%E3%83%95%E3%83%83%E3%82%AF%E3%81%A7%E5%8D%B3%E6%99%82%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%82%92%E6%8F%90%E4%BE%9B%E3%81%99%E3%82%8B" tabindex="-1"><a href="#%E3%83%97%E3%83%AA%E3%82%B3%E3%83%9F%E3%83%83%E3%83%88%E3%83%95%E3%83%83%E3%82%AF%E3%81%A7%E5%8D%B3%E6%99%82%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%82%92%E6%8F%90%E4%BE%9B%E3%81%99%E3%82%8B" class="header-anchor">プリコミットフックで即時フィードバックを提供する</a></h3>
+<p>リンター・フォーマッター・型チェックをCI(リモート実行)だけでなくプリコミットフック(ローカル即時実行)で走らせましょう。エージェントにとっての「即時フィードバック」は、人間にとってのコンパイルエラーと同じ役割を果たします。</p>
+<p><a href="https://liambx.com/blog/ai-agent-lint-enforcement-lefthook-claude-code" target="_blank" rel="noopener noreferrer">Lefthook</a>はGo製で高速です。<code>lefthook-local.yml</code>で個人設定を分離でき、人間は<code>git commit --no-verify</code>でスキップ可能です。エージェントに対してはClaude Code設定で<code>git commit --no-verify</code>の実行を禁止することで、フックのバイパスを構造的に不可能にします。人間には柔軟性を、エージェントには厳格性をという二重基準を設計します。</p>
+<p>注意点として、Claude Code Action(GitHub API経由のコミット)はローカルGitフックをバイパスします。PreToolUseフックでMCP操作の前にリントプロセスを挿入することで対応可能です。</p>
+<h3 id="adr%E3%81%A8%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%AB%E3%83%BC%E3%83%AB%E3%82%92%E7%B5%90%E5%90%88%E3%81%99%E3%82%8B" tabindex="-1"><a href="#adr%E3%81%A8%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%AB%E3%83%BC%E3%83%AB%E3%82%92%E7%B5%90%E5%90%88%E3%81%99%E3%82%8B" class="header-anchor">ADRと実行可能ルールを結合する</a></h3>
+<p><a href="https://github.com/archgate/cli" target="_blank" rel="noopener noreferrer">archgate</a>のアプローチは各ADRにコンパニオンの<code>.rules.ts</code>ファイルを持たせ、アーキテクチャ決定を実行可能なチェックとしてエンコードします。ADR(不変の「なぜ」)とリンタールール(実行可能な「何を」)の結合により、腐敗耐性の二条件を同時に満たします。</p>
+<h3 id="%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E8%A8%AD%E5%AE%9A%E4%BF%9D%E8%AD%B7%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AE%E3%80%8C%E3%83%AB%E3%83%BC%E3%83%AB%E6%94%B9%E7%AB%84%E3%80%8D%E3%82%92%E9%98%B2%E3%81%90" tabindex="-1"><a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E8%A8%AD%E5%AE%9A%E4%BF%9D%E8%AD%B7%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AE%E3%80%8C%E3%83%AB%E3%83%BC%E3%83%AB%E6%94%B9%E7%AB%84%E3%80%8D%E3%82%92%E9%98%B2%E3%81%90" class="header-anchor">リンター設定保護: エージェントの「ルール改竄」を防ぐ</a></h3>
+<p>エージェントがリンターエラーに直面した場合、コードを修正する代わりにリンター設定を変更してエラーを消す行為が頻繁に観察されます。以下のPreToolUseフックでこれを防ぎます。</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(jq -r \".tool_input.file_path // .tool_input.path\" &lt;&lt;&lt; \"$(cat)\"); PROTECTED=\".eslintrc eslint.config biome.json pyproject.toml .prettierrc tsconfig.json lefthook.yml .golangci.yml Cargo.toml .swiftlint.yml .pre-commit-config.yaml\"; for p in $PROTECTED; do case \"$FILE\" in *$p*) echo \"BLOCKED: $FILE is a protected config file. Fix the code, not the linter config.\" &gt;&amp;2; exit 2;; esac; done'"
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>さらにClaude Code設定で<code>git commit --no-verify</code>を禁止し、エージェントがGitフックをバイパスすることを構造的に不可能にします。</p>
+<h3 id="ai%E7%94%9F%E6%88%90%E3%82%B3%E3%83%BC%E3%83%89%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%AA%E3%83%B3%E3%83%88%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" tabindex="-1"><a href="#ai%E7%94%9F%E6%88%90%E3%82%B3%E3%83%BC%E3%83%89%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%AA%E3%83%B3%E3%83%88%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" class="header-anchor">AI生成コード固有のリントアンチパターン</a></h3>
+<p><a href="https://medium.com/@montes.makes/lint-against-the-machine-a-field-guide-to-catching-ai-coding-agent-anti-patterns-3c4ef7baeb9e" target="_blank" rel="noopener noreferrer">OX SecurityとSnykの調査</a>によれば、AI生成コードには人間のコードと異なる特有のアンチパターンが存在します。</p>
+<ol>
+<li>TypeScript any乱用: エージェントは型推論に失敗すると<code>any</code>に逃げる。<code>@typescript-eslint/no-explicit-any</code>をerrorレベルで強制する</li>
+<li>コード重複: エージェントはコードベースを検索せずに新しいコードを生成する。jscpdまたはPlanktonの重複検出で検知する</li>
+<li>ゴーストファイル: エージェントは既存ファイルを修正する代わりに、似た名前の新しいファイルを作成する。ファイル命名規則とディレクトリ構造をリンターで強制する</li>
+<li>コメント洪水: OX Securityの調査でAI生成リポジトリの90〜100%で「Comments Everywhere」パターンが観察された。コメント比率のチェックを検討する</li>
+<li>セキュリティ脆弱性: Snykによれば、AI生成コードの36〜40%にセキュリティ脆弱性が含まれる。gosec(Go)、Ruff Sルール(Python)、eslint-plugin-security(JS/TS)を必須にする</li>
+</ol>
+<h3 id="%E8%A8%80%E8%AA%9E%E5%88%A5%E6%8E%A8%E5%A5%A8%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" tabindex="-1"><a href="#%E8%A8%80%E8%AA%9E%E5%88%A5%E6%8E%A8%E5%A5%A8%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" class="header-anchor">言語別推奨リンタースタック</a></h3>
+<h4 id="typescript%2Fnode.js%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" tabindex="-1"><a href="#typescript%2Fnode.js%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" class="header-anchor">TypeScript/Node.jsプロジェクト</a></h4>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>ツール</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostToolUse(ms)</td>
+<td>Biome format → Oxlint</td>
+<td>自動フォーマット、高速リント</td>
+</tr>
+<tr>
+<td>プリコミット(s)</td>
+<td>Lefthook → Oxlint + tsc --noEmit</td>
+<td>全ファイルリント + 型チェック</td>
+</tr>
+<tr>
+<td>CI(min)</td>
+<td>ESLint(カスタムアーキテクチャルール)+ テストスイート</td>
+<td>深い解析</td>
+</tr>
+<tr>
+<td>カスタムルール</td>
+<td>eslint-plugin-local-rules or ast-grep</td>
+<td>アーキテクチャ境界</td>
+</tr>
+<tr>
+<td>設定保護</td>
+<td>PreToolUse Hook</td>
+<td>設定ファイル編集防止</td>
+</tr>
+</tbody>
+</table>
+<h4 id="python%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" tabindex="-1"><a href="#python%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" class="header-anchor">Pythonプロジェクト</a></h4>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>ツール</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostToolUse(ms)</td>
+<td>Ruff check --fix → Ruff format</td>
+<td>自動修正 + フォーマット</td>
+</tr>
+<tr>
+<td>プリコミット(s)</td>
+<td>Lefthook → Ruff + mypy</td>
+<td>全リント + 型チェック</td>
+</tr>
+<tr>
+<td>CI(min)</td>
+<td>Ruff + mypy + pytest</td>
+<td>全解析 + テスト</td>
+</tr>
+<tr>
+<td>カスタムルール</td>
+<td>ast-grep or pylint custom checkers</td>
+<td>アーキテクチャ境界</td>
+</tr>
+</tbody>
+</table>
+<h4 id="go%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" tabindex="-1"><a href="#go%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" class="header-anchor">Goプロジェクト</a></h4>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>ツール</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostToolUse(ms)</td>
+<td>gofumpt + golangci-lint(高速サブセット)</td>
+<td>フォーマット + 高速リント</td>
+</tr>
+<tr>
+<td>プリコミット(s)</td>
+<td>Lefthook → golangci-lint --fix</td>
+<td>全リント + 自動修正</td>
+</tr>
+<tr>
+<td>CI(min)</td>
+<td>golangci-lint(フル設定)+ go test</td>
+<td>全解析 + テスト</td>
+</tr>
+</tbody>
+</table>
+<h4 id="rust%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" tabindex="-1"><a href="#rust%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88" class="header-anchor">Rustプロジェクト</a></h4>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>ツール</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostToolUse(ms)</td>
+<td>rustfmt</td>
+<td>フォーマット</td>
+</tr>
+<tr>
+<td>プリコミット(s)</td>
+<td>Lefthook → cargo clippy(pedantic, deny allow_attributes)</td>
+<td>全リント</td>
+</tr>
+<tr>
+<td>CI(min)</td>
+<td>cargo clippy + cargo test</td>
+<td>全解析 + テスト</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%81%AE%E9%80%9F%E5%BA%A6%E3%81%8C%E5%93%81%E8%B3%AA%E3%82%92%E6%B1%BA%E5%AE%9A%E3%81%99%E3%82%8B" tabindex="-1"><a href="#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%81%AE%E9%80%9F%E5%BA%A6%E3%81%8C%E5%93%81%E8%B3%AA%E3%82%92%E6%B1%BA%E5%AE%9A%E3%81%99%E3%82%8B" class="header-anchor">フィードバックの速度が品質を決定する</a></h3>
+<p>フィードバックループの品質は速度に比例します。</p>
+<ul>
+<li>最速(ミリ秒): PostToolUse Hook → フォーマッター自動実行。エージェントは違反に気づく前に修正が終わっている</li>
+<li>速い(秒): プリコミットフック → リンター・型チェック。コミット前に問題を発見</li>
+<li>遅い(分): CI/CDパイプライン → 全テストスイート。マージ前に問題を発見</li>
+<li>最遅(時間〜日): 人間のコードレビュー。マージ後に問題を発見</li>
+</ul>
+<p>ハーネスエンジニアリングの目標はできるだけ多くのチェックをより速いレイヤーに移動させることです。CIでしか走らないリンターはプリコミットフックに、プリコミットフックでしか走らないフォーマッターはPostToolUse Hookに移動します。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/feedback-speed-layers.png" alt="フィードバック速度の階層"></p>
+<h3 id="%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%92%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%AB%E3%81%99%E3%82%8B" tabindex="-1"><a href="#%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%82%92%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB%E3%81%AB%E3%81%99%E3%82%8B" class="header-anchor">アーキテクチャをガードレールにする</a></h3>
+<p><a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html" target="_blank" rel="noopener noreferrer">Birgitta Böckeler(Thoughtworks)</a>の観察ですが、AIが生成するコードへの信頼性を高めるには逆説的に解決空間を拡大するのではなく制約することが必要です。人間にとっては窮屈に感じるルールでも、エージェントにとっては複利的な品質向上になります。</p>
+<p><a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">OpenAIチーム</a>の実践では各ビジネスドメインを固定レイヤーセットに分割し、依存方向を厳密に検証しました。横断的関心事(認証、テレメトリ、フィーチャーフラグ)は単一の明示的インターフェース(Providers)を通じてのみ注入します。これらの制約はカスタムリンターと構造テストで機械的に強制されます。</p>
+<p>将来、技術スタックやコードベース構造は柔軟性ではなく「ハーネスフレンドリーさ」で選ばれるかもしれません。静的型付け言語は動的型付け言語よりエージェントに多くの構造的フィードバックを提供します。標準化されたパターンはエージェントが一貫して正しくコードを生成する確率を高めます。</p>
+<p>このように決定論的ツールの重要性を見てきました。ではこれらのルールをエージェントにどう伝えるか、AGENTS.md/CLAUDE.mdの設計に移りましょう。</p>
+<h2 id="3%3A-agents.md-%2F-claude.md%E3%82%92%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%A8%E3%81%97%E3%81%A6%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" tabindex="-1"><a href="#3%3A-agents.md-%2F-claude.md%E3%82%92%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%A8%E3%81%97%E3%81%A6%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" class="header-anchor">3: AGENTS.md / CLAUDE.mdをポインタとして設計する</a></h2>
+<h3 id="%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE" tabindex="-1"><a href="#%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%82%82%E3%81%AE" class="header-anchor">書くべきもの</a></h3>
+<ul>
+<li>ルーティング指示: <code>npm test</code>で走る、ADRは<code>/docs/adr/</code>にある、アーキテクチャルールは<code>archgate check</code>で検証せよ</li>
+<li>禁止事項の一覧: 各項目がADRまたはリンタールールへの参照を持つ</li>
+<li>ビルド・テスト・デプロイの最低限のコマンド</li>
+</ul>
+<h3 id="%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE" tabindex="-1"><a href="#%E6%9B%B8%E3%81%8F%E3%81%B9%E3%81%8D%E3%81%A7%E3%81%AA%E3%81%84%E3%82%82%E3%81%AE" class="header-anchor">書くべきでないもの</a></h3>
+<ul>
+<li>システムの現状説明(コードとテストが真実のソース)</li>
+<li>技術スタックの解説(エージェントはpackage.jsonやgo.modを読める)</li>
+<li>冗長なコーディングスタイルガイド(リンターとフォーマッターに委ねる)</li>
+</ul>
+<h3 id="%E3%82%B5%E3%82%A4%E3%82%BA%E3%81%AE%E7%9B%AE%E5%AE%89" tabindex="-1"><a href="#%E3%82%B5%E3%82%A4%E3%82%BA%E3%81%AE%E7%9B%AE%E5%AE%89" class="header-anchor">サイズの目安</a></h3>
+<p>短ければ短いほど良いです。理想は50行以下です。</p>
+<p><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener noreferrer">Anthropicの公式ドキュメント</a>は「200行以下」を明記していますが、これは上限であって目標ではありません。指示が増えるほど遵守率は下がります。<a href="https://arxiv.org/abs/2507.11538" target="_blank" rel="noopener noreferrer">IFScale</a>の研究は150〜200指示の時点でprimacy bias(先頭の指示への偏り)が顕著になり性能が劣化し始めることを示しました。「150まで大丈夫」ではなく「150から壊れ始める」と読むべきです。</p>
+<p>Claude Codeのシステムプロンプト自体が<a href="https://www.humanlayer.dev/blog/writing-a-good-claude-md" target="_blank" rel="noopener noreferrer">約50の指示を含む</a>ので、ユーザーのCLAUDE.md(Codexの場合はAGENTS.md)が100行あればエージェントは計150の指示を抱えます。ここに長大なコンテキストファイルが加われば重要な指示が埋もれます。</p>
+<p>実践的な設計:</p>
+<ul>
+<li>ルートファイルは50行以下を目指す。リポジトリの最小限の事実、利用可能なスキル・MCP接続へのポインタのみ(<a href="https://addyosmani.com/blog/agents-md/" target="_blank" rel="noopener noreferrer">Addy Osmani</a>)</li>
+<li>詳細はオンデマンドロード。Skills、<code>.claude/rules/</code>ファイル、サブディレクトリ別AGENTS.mdで分割する</li>
+<li>圧縮は積極的に。<a href="https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals" target="_blank" rel="noopener noreferrer">Vercel</a>は40KBを8KBに圧縮しても100%のパス率を維持した</li>
+<li>各行に問う: 「この行を消したらエージェントは間違えるか?」 答えがNoなら削除する</li>
+</ul>
+<h3 id="%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%8C%E8%85%90%E6%95%97%E3%81%97%E3%81%9F%E5%A0%B4%E5%90%88" tabindex="-1"><a href="#%E3%83%9D%E3%82%A4%E3%83%B3%E3%82%BF%E3%81%8C%E8%85%90%E6%95%97%E3%81%97%E3%81%9F%E5%A0%B4%E5%90%88" class="header-anchor">ポインタが腐敗した場合</a></h3>
+<p>ポインタ型の設計には副次的利点があります。ポインタが指すファイルパスが存在しなくなれば404に相当するエラーが起き、腐敗が機械的に検出可能になります。記述的ドキュメントの腐敗は沈黙のうちに進行しますが、壊れたポインタは騒がしく失敗します。</p>
+<p>ここまでエージェントへの指示の設計を見てきました。次はエージェントに実際にタスクをどう実行させるか、計画と実行の分離について考えていきましょう。</p>
+<h2 id="4%3A-%E8%A8%88%E7%94%BB%E3%81%A8%E5%AE%9F%E8%A1%8C%E3%82%92%E5%88%86%E9%9B%A2%E3%81%99%E3%82%8B" tabindex="-1"><a href="#4%3A-%E8%A8%88%E7%94%BB%E3%81%A8%E5%AE%9F%E8%A1%8C%E3%82%92%E5%88%86%E9%9B%A2%E3%81%99%E3%82%8B" class="header-anchor">4: 計画と実行を分離する</a></h2>
+<h3 id="%E8%A8%88%E7%94%BB%E3%83%95%E3%82%A7%E3%83%BC%E3%82%BA" tabindex="-1"><a href="#%E8%A8%88%E7%94%BB%E3%83%95%E3%82%A7%E3%83%BC%E3%82%BA" class="header-anchor">計画フェーズ</a></h3>
+<p><a href="https://boristane.com/blog/how-i-use-claude-code/" target="_blank" rel="noopener noreferrer">Boris Tane(Cloudflare)</a>はこう述べています。「計画と実行の分離は、私が行う最も重要な単一のことだ。無駄な努力を防ぎ、アーキテクチャ決定の制御を維持し、コードにいきなり飛び込むよりも大幅に良い結果を、最小限のトークン使用量で生み出す。」</p>
+<p>エージェントにまず計画を立てさせ、人間がレビュー・承認してから初めて実行に移します。多くのAIコーディングツールが「plan mode」を搭載しているのはこのためです。</p>
+<h3 id="%E3%82%BF%E3%82%B9%E3%82%AF%E3%81%AE%E7%B2%92%E5%BA%A6" tabindex="-1"><a href="#%E3%82%BF%E3%82%B9%E3%82%AF%E3%81%AE%E7%B2%92%E5%BA%A6" class="header-anchor">タスクの粒度</a></h3>
+<p><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener noreferrer">Anthropic</a>の知見としてエージェントは一度にすべてをやろうとする傾向があります(ワンショット問題)。明示的に「一度に一つの機能だけに取り組め」と指示することでこの問題を回避します。大きな目標を小さな構成要素に分解し、各構成要素を完了させてから次に進みます。</p>
+<h3 id="%E3%83%86%E3%82%B9%E3%83%88%E3%81%AB%E3%82%88%E3%82%8B%E5%AE%8C%E4%BA%86%E3%81%AE%E6%A4%9C%E8%A8%BC" tabindex="-1"><a href="#%E3%83%86%E3%82%B9%E3%83%88%E3%81%AB%E3%82%88%E3%82%8B%E5%AE%8C%E4%BA%86%E3%81%AE%E6%A4%9C%E8%A8%BC" class="header-anchor">テストによる完了の検証</a></h3>
+<p>エージェントは機能を「完了」と宣言する傾向がありますが、実際にはEnd-to-Endテストを通していないことが多いです。明示的にブラウザ自動化ツール等でのEnd-to-Endテストを指示することで、完了判断の精度が劇的に向上します(Anthropicの実験で確認済み)。</p>
+<p>さて「テストで完了を検証する」というフレーズが出てきましたが、ではE2Eテストをどう設計すべきなのかということをまとめていきます。</p>
+<h2 id="5%3A-e2e%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AB%E3%81%82%E3%82%89%E3%82%86%E3%82%8B%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AE%E3%80%8C%E7%9B%AE%E3%80%8D%E3%82%92%E4%B8%8E%E3%81%88%E3%82%8B" tabindex="-1"><a href="#5%3A-e2e%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5%3A-%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E3%81%AB%E3%81%82%E3%82%89%E3%82%86%E3%82%8B%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AE%E3%80%8C%E7%9B%AE%E3%80%8D%E3%82%92%E4%B8%8E%E3%81%88%E3%82%8B" class="header-anchor">5: E2Eテスト戦略: エージェントにあらゆるアプリの「目」を与える</a></h2>
+<p>エージェントは自分が書いたコードを「見る」手段がなければ、コンパイルが通っただけで「完了」と宣言します。ブラウザ自動化ツールを組み合わせることでエージェントは実際にUIを操作し、人間ユーザーと同じ視点で検証できるようになります。<a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener noreferrer">Anthropicの長時間稼働エージェント実験</a>ではPuppeteer MCPでブラウザ自動化を導入したことで性能が劇的に改善しました。コードだけからでは見えなかったバグをエージェントが自力で発見・修正できるようになったのです。</p>
+<h3 id="web%E3%82%A2%E3%83%97%E3%83%AA%3A-%E3%83%84%E3%83%BC%E3%83%AB%E6%AF%94%E8%BC%83(3%E3%81%A4%E3%81%AE%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81)" tabindex="-1"><a href="#web%E3%82%A2%E3%83%97%E3%83%AA%3A-%E3%83%84%E3%83%BC%E3%83%AB%E6%AF%94%E8%BC%83(3%E3%81%A4%E3%81%AE%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81)" class="header-anchor">Webアプリ: ツール比較(3つのアプローチ)</a></h3>
+<p>Anthropicの元研究ではPuppeteer MCPが使用されましたが、Playwrightエコシステムが急速に進化し、2026年3月時点ではPlaywright系が主流になっています。</p>
+<h4 id="1.-playwright-mcp(microsoft%E5%85%AC%E5%BC%8F)" tabindex="-1"><a href="#1.-playwright-mcp(microsoft%E5%85%AC%E5%BC%8F)" class="header-anchor">1. Playwright MCP(Microsoft公式)</a></h4>
+<p>アクセシビリティツリーベースのインタラクションを提供し、要素をrole/nameで直接参照・操作可能です。全主要エージェント(Claude Code, Codex, Cursor, GitHub Copilot)で動作します。</p>
+<p>利点としてはエコシステムが最も成熟しています。<a href="https://shipyard.build/blog/playwright-agents-claude-code/" target="_blank" rel="noopener noreferrer">Playwright v1.56+</a>で3つの専用サブエージェント(Planner, Generator, Healer)を搭載しています。Plannerが探索計画を立て、Generatorがテストコードを生成し、HealerがUI変更時にセレクターを自動修正します。CIで標準的なPlaywrightテストとしてヘッドレス実行可能です。</p>
+<p>欠点としてはMCP税(MCP Tax)が深刻です。26以上のツール定義がコンテキストウィンドウを消費し、アクション毎にアクセシビリティツリー全体(複雑なサイトで3,000+ノード)が返されます。典型的なブラウザ自動化タスクで約114,000トークンを消費します。長いセッションではコンテキスト腐敗が顕著になり精度が低下します。</p>
+<p>適用場面としてはテストスイートの「生成」に使い、生成されたPlaywrightテストファイルをCIで独立実行するワークフローが最も現実的です。</p>
+<h4 id="2.-playwright-cli(%40playwright%2Fcli)" tabindex="-1"><a href="#2.-playwright-cli(%40playwright%2Fcli)" class="header-anchor">2. Playwright CLI(<code>@playwright/cli</code>)</a></h4>
+<p>Playwright MCPと同じ基盤ですがMCPプロトコルの代わりにシェルコマンドで操作します。</p>
+<p>利点としては<a href="https://www.awesome-testing.com/2026/03/playwright-cli-skills-and-isolated-agentic-testing" target="_blank" rel="noopener noreferrer">トークン効率がMCPの約4倍</a>です。同じタスクでMCPが約114,000トークンを消費するのに対しCLIは約27,000トークン。アクセシビリティスナップショットとスクリーンショットをファイルシステムに保存しコンテキストウィンドウに流し込みません。</p>
+<p>適用場面としてはClaude CodeやCodexでのE2Eテストの主力ツールです。MCP版よりCLI版を優先すべきです。特にコンテキストウィンドウが逼迫する長いセッションで効果が大きいです。</p>
+<h4 id="3.-agent-browser(vercel-labs)" tabindex="-1"><a href="#3.-agent-browser(vercel-labs)" class="header-anchor">3. agent-browser(Vercel Labs)</a></h4>
+<p>Playwright上に構築されたCLIで、エージェント向けに設計されたスナップショット＋要素参照(ref)パターンが特徴です。</p>
+<p>利点としては<a href="https://www.pulumi.com/blog/self-verifying-ai-agents-vercels-agent-browser-in-the-ralph-wiggum-loop/" target="_blank" rel="noopener noreferrer">最もトークン効率が高い</a>です。同じ6テストでPlaywright MCPが約31Kキャラクター消費するのに対しagent-browserは約5.5K(5.7倍のテスト効率)です。要素参照(<code>@e1</code>, <code>@e2</code>...)によりCSSセレクターの脆さを回避します。Rust CLIによりNode.jsコールドスタートなしです。</p>
+<p>欠点としてはリリースから2ヶ月でまだ荒いです。Windows対応に複数の未解決issueがあり、ドキュメントが薄くソースコードを読む必要がある場面があります。</p>
+<h4 id="%E6%8E%A8%E5%A5%A8%3A-%E7%94%A8%E9%80%94%E5%88%A5%E3%81%AE%E9%81%B8%E5%AE%9A" tabindex="-1"><a href="#%E6%8E%A8%E5%A5%A8%3A-%E7%94%A8%E9%80%94%E5%88%A5%E3%81%AE%E9%81%B8%E5%AE%9A" class="header-anchor">推奨: 用途別の選定</a></h4>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>推奨ツール</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>セルフテストループ</td>
+<td>agent-browser or Playwright CLI</td>
+<td>トークン効率が決定的に重要</td>
+</tr>
+<tr>
+<td>テストスイート生成</td>
+<td>Playwright MCP + サブエージェント</td>
+<td>Planner/Generator/Healerの3エージェント構成</td>
+</tr>
+<tr>
+<td>探索的テスト</td>
+<td>agent-browser</td>
+<td>ref方式がセレクターの壊れにくさで有利</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/img/harness-engineering-best-practices-2026/e2e-test-tools.png" alt="E2Eテストツール選定"></p>
+<h3 id="%E6%99%AE%E9%81%8D%E7%9A%84%E5%8E%9F%E5%89%87%3A-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC%E3%81%AF%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%AB%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A7%E3%83%BC%E3%82%B9" tabindex="-1"><a href="#%E6%99%AE%E9%81%8D%E7%9A%84%E5%8E%9F%E5%89%87%3A-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC%E3%81%AF%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%AB%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A7%E3%83%BC%E3%82%B9" class="header-anchor">普遍的原則: アクセシビリティツリーはユニバーサルインターフェース</a></h3>
+<p>Webアプリでの成功パターンを振り返るとPlaywright MCPもagent-browserもアクセシビリティツリーを介してUIと対話しています。スクリーンショットではなく構造化テキストとしてUIを読み取ることで、要素をrole/nameで直接操作でき、出力が決定論的でありCIでのアサーションも容易になります。</p>
+<p>この原則はWebに限りません。macOS・Windows・LinuxにはそれぞれネイティブのアクセシビリティAPI(NSAccessibility、UIAutomation、AT-SPI2)が存在しあらゆるGUIアプリをアクセシビリティツリーとして構造化テキストで読み取ることができます。</p>
+<h3 id="%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC-vs-%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%3A-%E4%BD%BF%E3%81%84%E5%88%86%E3%81%91" tabindex="-1"><a href="#%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3%E3%83%84%E3%83%AA%E3%83%BC-vs-%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%3A-%E4%BD%BF%E3%81%84%E5%88%86%E3%81%91" class="header-anchor">アクセシビリティツリー vs スクリーンショット: 使い分け</a></h3>
+<p>アクセシビリティツリーが適する場面:</p>
+<ul>
+<li>プログラム的操作: 要素にrole/name/stateが付与されており<code>click element[name='Submit']</code>のように操作できる。座標推測が不要で安定</li>
+<li>決定論的テスト: 同じページは常に同じツリーを返す。CIでのdiff・アサーションが容易</li>
+<li>操作自動化: フォーム入力、ナビゲーション、ボタンクリック等の定型操作</li>
+</ul>
+<p>スクリーンショットが適する場面:</p>
+<ul>
+<li>ビジュアルバグの検出: レイアウト崩れ、CSS不具合、要素の重なり、色・フォント・余白の問題</li>
+<li>視覚的回帰テスト: 「このページは見た目が正しいか?」の判断</li>
+<li>Canvas/チャート/地図/画像: アクセシビリティツリーに表現されないリッチコンテンツ</li>
+<li>空間的レイアウトの把握: 要素の位置関係、整列、レスポンシブ挙動</li>
+</ul>
+<p>すべてのアプリケーションタイプに共通する設計原則として:</p>
+<ol>
+<li>構造化テキスト出力を優先する: エージェントに「見せる」手段は可能な限り構造化テキスト(JSON、アクセシビリティツリー、CLIの標準出力)であるべき</li>
+<li>検証を決定論的にする: エージェントが生成したテストを決定論的に実行可能な形にする。エージェント自身をCIに入れない</li>
+<li>フィードバックループを閉じる: build → run → verify → fixのサイクルをエージェントが自律的に回せる環境を構築する</li>
+</ol>
+<h3 id="%E3%83%A2%E3%83%90%E3%82%A4%E3%83%AB%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#%E3%83%A2%E3%83%90%E3%82%A4%E3%83%AB%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">モバイルアプリE2Eテスト</a></h3>
+<h4 id="%E7%8A%B6%E6%B3%81(2026%E5%B9%B43%E6%9C%88)" tabindex="-1"><a href="#%E7%8A%B6%E6%B3%81(2026%E5%B9%B43%E6%9C%88)" class="header-anchor">状況(2026年3月)</a></h4>
+<p><a href="https://www.apple.com/newsroom/2026/02/xcode-26-point-3-unlocks-the-power-of-agentic-coding/" target="_blank" rel="noopener noreferrer">Xcode 26.3がMCPネイティブサポートを導入</a>し、Claude AgentとCodexがXcode内で直接動作するようになりました。エージェントはXCTestの生成・実行・失敗時の修正を自律的に行い、Xcode Previewsのスクリーンショットで視覚的に検証できます。iOS開発においてエージェントE2Eテストは「実験的」から「プロダクション対応」に移行しました。</p>
+<h4 id="%E6%8E%A8%E5%A5%A8%E3%83%84%E3%83%BC%E3%83%AB%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" tabindex="-1"><a href="#%E6%8E%A8%E5%A5%A8%E3%83%84%E3%83%BC%E3%83%AB%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AF" class="header-anchor">推奨ツールスタック</a></h4>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>対象</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/getsentry/XcodeBuildMCP" target="_blank" rel="noopener noreferrer">XcodeBuildMCP</a></td>
+<td>iOS(Xcode 26.3)</td>
+<td>Sentry買収済み、59のMCPツール。ビルドエラーをJSON構造化して返す</td>
+</tr>
+<tr>
+<td><a href="https://lobehub.com/mcp/joshuayoes-ios-simulator-mcp" target="_blank" rel="noopener noreferrer">iOS Simulator MCP Server</a></td>
+<td>iOS Simulator</td>
+<td>FacebookのIDBツール経由。v1.3.3以降を使うこと(コマンドインジェクション脆弱性あり)</td>
+</tr>
+<tr>
+<td><a href="https://github.com/mobile-next/mobile-mcp" target="_blank" rel="noopener noreferrer">mobile-mcp</a></td>
+<td>iOS/Android</td>
+<td>プラットフォーム非依存MCP。ネイティブアクセシビリティツリーでのインタラクション</td>
+</tr>
+<tr>
+<td><a href="https://github.com/appium/appium-mcp" target="_blank" rel="noopener noreferrer">Appium MCP</a></td>
+<td>iOS/Android</td>
+<td>既存Appiumインフラ向け。メンテナンスコスト最大90%削減</td>
+</tr>
+<tr>
+<td><a href="https://github.com/wix/Detox" target="_blank" rel="noopener noreferrer">Detox</a></td>
+<td>React Native</td>
+<td>Wix製グレーボックステスト。非同期処理を監視してフレーク防止</td>
+</tr>
+<tr>
+<td><a href="https://maestro.dev/" target="_blank" rel="noopener noreferrer">Maestro MCP</a></td>
+<td>モバイル全般</td>
+<td>YAMLスクリプト。セットアップが軽くプロトタイプ向き</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%E3%83%A2%E3%83%90%E3%82%A4%E3%83%ABe2e%E3%81%AE%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" tabindex="-1"><a href="#%E3%83%A2%E3%83%90%E3%82%A4%E3%83%ABe2e%E3%81%AE%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" class="header-anchor">モバイルE2Eの設計判断</a></h4>
+<table>
+<thead>
+<tr>
+<th>判断軸</th>
+<th>推奨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iOS専用プロジェクト</td>
+<td>XcodeBuildMCP + Xcode 26.3ネイティブ統合</td>
+</tr>
+<tr>
+<td>Android専用プロジェクト</td>
+<td>mobile-mcp or Appium MCP</td>
+</tr>
+<tr>
+<td>クロスプラットフォーム(React Native)</td>
+<td>Detox(テスト生成)+ mobile-mcp(探索的テスト)</td>
+</tr>
+<tr>
+<td>プロトタイプ・スモークテスト</td>
+<td>Maestro MCP</td>
+</tr>
+<tr>
+<td>既存Appiumインフラあり</td>
+<td>Appium MCP</td>
+</tr>
+</tbody>
+</table>
+<p>モバイルでもWebと同じ「生成と実行の分離」原則が適用されます。エージェントにMCPツールでテストを生成させ、生成されたXCTest/Detox/EspressoテストをCIで決定論的に実行します。</p>
+<h3 id="cli%2Ftui%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#cli%2Ftui%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">CLI/TUIアプリケーションE2Eテスト</a></h3>
+<p>CLIツールはエージェントが最も自然にテストできるアプリケーションタイプです。エージェント自身がシェルコマンドを実行できるためUIレイヤーのブリッジが不要です。</p>
+<p><a href="https://github.com/bats-core/bats-core" target="_blank" rel="noopener noreferrer">bats-core(Bash Automated Testing System)</a>はBashスクリプトのテストに最適です。TAP準拠の出力でCI統合が容易で、各テストケースが独立プロセスで実行されるため状態リークがありません。</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># test/mycli.bats
+@test "help flag shows usage" {
+  run ./mycli --help
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Usage:"* ]]
+}
+
+@test "invalid input returns error" {
+  run ./mycli --invalid-flag
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"unknown flag"* ]]
+}
+</code></pre>
+<p>ベストプラクティスとしてスクリプトのメインロジックを<code>run_main</code>関数に移動し<code>if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then run_main; fi</code>で囲みます。これによりbatsからソースとして読み込んでも関数単位でテスト可能になります。</p>
+<p>pexpect/expectは対話的CLIのテストに使用します。プロンプト応答、タイムアウト、パスワード入力などのインタラクティブな操作をプログラムで制御可能です。</p>
+<p>CLI向けのStop Hook例です。</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if [ -f ./test/cli.bats ]; then bats ./test/cli.bats 2&gt;&amp;1 | tail -20; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<h3 id="api%2F%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89e2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#api%2F%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89e2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">API/バックエンドE2Eテスト</a></h3>
+<p>バックエンドの変更をユニットテストだけで検証するのは不十分です。エージェントがAPIエンドポイントを変更した場合、実際にHTTPリクエストを発行して応答を検証するE2Eテストが必要です。</p>
+<p><a href="https://hurl.dev/" target="_blank" rel="noopener noreferrer">Hurl</a>(Orange/libcurl基盤)はプレーンテキストでHTTPリクエストとアサーションを定義するCLIツールです。Rustで書かれた軽量バイナリで、エージェントとの相性が極めて良いです。プレーンテキスト形式のためエージェントが読み書きしやすく、生成されたHurlファイルはCIで決定論的に実行可能です。</p>
+<pre class="language-hurl" tabindex="0"><code class="language-hurl"># test/api/users.hurl
+POST http://localhost:3000/api/users
+Content-Type: application/json
+{
+  "name": "Test User",
+  "email": "test@example.com"
+}
+HTTP 201
+[Asserts]
+jsonpath "$.id" exists
+jsonpath "$.name" == "Test User"
+
+GET http://localhost:3000/api/users/{{id}}
+HTTP 200
+[Asserts]
+jsonpath "$.email" == "test@example.com"
+</code></pre>
+<p><a href="https://docs.pact.io/" target="_blank" rel="noopener noreferrer">Pact</a>(契約テスト)はマイクロサービス間のAPI契約を検証します。Pact v4.0.0(2026年)でGraphQLサポート、非同期メッセージ処理の改善、MatchersV2による型安全性が向上しています。エージェントにPactのコンシューマーテストを生成させプロバイダー検証をCIで実行するワークフローが推奨です。</p>
+<p>gRPCテストではPact経由の契約テストに加え<code>grpcurl</code>(CLIからgRPCサービスを呼ぶcurl相当)をエージェントに直接使わせることでgRPCエンドポイントのスモークテストが可能です。</p>
+<p>データベース統合テストでは<a href="https://testcontainers.com/" target="_blank" rel="noopener noreferrer">Testcontainers</a>でテスト用DBコンテナを起動し、マイグレーション→シード→テスト→破棄のサイクルを自動化します。</p>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>用途</th>
+<th>エージェントとの相性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hurl</td>
+<td>HTTP API E2Eテスト</td>
+<td>最高(プレーンテキスト、CLI、決定論的)</td>
+</tr>
+<tr>
+<td>Pact</td>
+<td>マイクロサービス契約テスト</td>
+<td>高(テスト生成→CI実行パターンに適合)</td>
+</tr>
+<tr>
+<td>grpcurl</td>
+<td>gRPCスモークテスト</td>
+<td>高(CLIベース)</td>
+</tr>
+<tr>
+<td>Testcontainers</td>
+<td>DB統合テスト</td>
+<td>中(セットアップが必要だがCI統合は確立)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AAe2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">デスクトップアプリE2Eテスト</a></h3>
+<h4 id="electron%E3%82%A2%E3%83%97%E3%83%AA" tabindex="-1"><a href="#electron%E3%82%A2%E3%83%97%E3%83%AA" class="header-anchor">Electronアプリ</a></h4>
+<p>Electronアプリのテストには従来型とMCPベースの2つのアプローチがあります。</p>
+<p><strong>従来型E2Eテスト:</strong></p>
+<ul>
+<li><strong>Playwright</strong>(<code>_electron.launch()</code>): 実験的(experimental)だが最も広く使われています。Electron v12.2.0+対応でPage APIの全機能が利用可能です。メインプロセスのコード実行、ビデオ録画、スクリーンショット撮影に対応しています</li>
+<li><strong>WebdriverIO</strong>(<a href="https://github.com/webdriverio-community/wdio-electron-service" target="_blank" rel="noopener noreferrer">wdio-electron-service</a> v9.2.1): 非推奨のSpectronの後継として最も成熟しています。Electron ForgeとElectron Builderのバンドルパスを自動検出します。Linux CI向けヘッドレスXvfb実行に対応しています</li>
+</ul>
+<p><strong>MCP経由のAIエージェント駆動テスト:</strong></p>
+<p>Electron MCP Serverの空間は断片化しており9以上のプロジェクトが乱立しています。支配的な標準はまだ存在しません。</p>
+<table>
+<thead>
+<tr>
+<th>プロジェクト</th>
+<th>Stars</th>
+<th>アプローチ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/amafjarkasi/electron-mcp-server" target="_blank" rel="noopener noreferrer">amafjarkasi/electron-mcp-server</a></td>
+<td>60</td>
+<td>CDP(port 9222)、プロセス管理、JS実行</td>
+</tr>
+<tr>
+<td><a href="https://github.com/icefort-ai/circuit-mcp" target="_blank" rel="noopener noreferrer">circuit-mcp</a></td>
+<td>54</td>
+<td>Web(29ツール)+Desktop/Electron(32ツール)、アクセシビリティ優先、自動スナップショット</td>
+</tr>
+<tr>
+<td><a href="https://github.com/kanishka-namdeo/electron-mcp" target="_blank" rel="noopener noreferrer">kanishka-namdeo/electron-mcp</a></td>
+<td>0</td>
+<td>44ツール(6カテゴリ)、CDP+Playwright、コード録画→テスト出力</td>
+</tr>
+<tr>
+<td><a href="https://github.com/robertn702/playwright-mcp-electron" target="_blank" rel="noopener noreferrer">robertn702/playwright-mcp-electron</a></td>
+<td>5</td>
+<td>Playwright MCP公式フォーク+Electron固有ツール(<code>electron_evaluate</code>等)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>公式Playwright MCP</strong>(<a href="https://github.com/microsoft/playwright-mcp" target="_blank" rel="noopener noreferrer">microsoft/playwright-mcp</a> 28.5k stars)にもElectronサポートが開発中です。<code>ElectronContextFactory</code>や<code>--electron-app</code>フラグの実装コミットが確認されていますが安定リリースには未到達です。公式対応が実現すればエコシステムは収束する可能性が高いです。</p>
+<p>いずれのMCPサーバーもChromium DevTools Protocol(CDP)経由でElectronに接続しアクセシビリティツリーベースでUI操作を行う点は共通しています。Electronは<code>app.setAccessibilitySupportEnabled(true)</code>でChromiumアクセシビリティツリーをプログラム的に有効化できます。</p>
+<h4 id="tauri%E3%82%A2%E3%83%97%E3%83%AA" tabindex="-1"><a href="#tauri%E3%82%A2%E3%83%97%E3%83%AA" class="header-anchor">Tauriアプリ</a></h4>
+<p><strong>公式tauri-driver:</strong> WebDriverインターフェースをWindows/Linuxでサポートしています。<strong>macOSは未サポート</strong>です(Apple WKWebView用のWebDriverが存在しないため)。WebdriverIOまたはSeleniumでE2Eテスト可能です。</p>
+<p><strong>macOSの代替手段:</strong></p>
+<ul>
+<li><a href="https://github.com/Choochmeque/tauri-webdriver" target="_blank" rel="noopener noreferrer">tauri-webdriver</a>(Choochmeque): クロスプラットフォームW3C WebDriverサーバー。<code>tauri-plugin-webdriver</code>埋め込みでmacOS/Windows/Linuxに対応します。2026年2月公開で非常に新しいです</li>
+<li><a href="https://danielraffel.me/2026/02/14/i-built-a-webdriver-for-wkwebview-tauri-apps-on-macos/" target="_blank" rel="noopener noreferrer">Tauri-WebDriver</a>(Daniel Raffel): macOS専用。JSブリッジ+CLI(<code>tauri-wd</code>)アーキテクチャでMCPインテグレーション付きです</li>
+<li><a href="https://docs.crabnebula.dev/plugins/tauri-e2e-tests/" target="_blank" rel="noopener noreferrer">@crabnebula/tauri-driver</a>(CrabNebula): macOSテストには有料サブスクリプションが必要です</li>
+</ul>
+<p><strong>Tauri向けMCPサーバー:</strong></p>
+<ul>
+<li><a href="https://github.com/P3GLEG/tauri-plugin-mcp" target="_blank" rel="noopener noreferrer">tauri-plugin-mcp</a>(80 stars): Tauriプラグイン+MCPサーバー。スクリーンショット、DOM操作、クリック、入力等10ツール。IPC/TCP通信</li>
+<li><a href="https://github.com/dirvine/tauri-mcp" target="_blank" rel="noopener noreferrer">tauri-mcp</a>(28 stars): プロセス管理、ウィンドウ操作、入力シミュレーション、IPC等12ツール。Windows/macOS/Linux(X11)対応</li>
+</ul>
+<h4 id="%E3%83%8D%E3%82%A4%E3%83%86%E3%82%A3%E3%83%96%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA" tabindex="-1"><a href="#%E3%83%8D%E3%82%A4%E3%83%86%E3%82%A3%E3%83%96%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA" class="header-anchor">ネイティブデスクトップアプリ</a></h4>
+<p><a href="https://testdriver.ai/" target="_blank" rel="noopener noreferrer">TestDriver.ai</a>(v7.4.5、217 stars)はComputer-Use SDKによるE2Eテストです。独自のファインチューニング済みAIモデルがスクリーンショットでUIを理解しハードウェアエミュレーションでマウス・キーボードを操作します。テストはJavaScript/TypeScript(Vitest)で記述し自然言語プロンプトで操作を指示します。GitHub Actions(<a href="https://github.com/testdriverai/action" target="_blank" rel="noopener noreferrer">testdriverai/action</a>)でエフェメラルMac1 VMを自動プロビジョニングしてCI実行可能です。セレクターやテストIDが不要なため、VS Code拡張、Chrome拡張、OAuthフロー等テスト困難な領域に特に適しています。</p>
+<h4 id="%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%E5%88%A5%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3api" tabindex="-1"><a href="#%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%E5%88%A5%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B7%E3%83%93%E3%83%AA%E3%83%86%E3%82%A3api" class="header-anchor">プラットフォーム別アクセシビリティAPI</a></h4>
+<p>2025-2026年でMCPベースのデスクトップ自動化ツールが急速に成熟し始めています。</p>
+<table>
+<thead>
+<tr>
+<th>プラットフォーム</th>
+<th>アクセシビリティAPI</th>
+<th>エージェント向けツール</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macOS</td>
+<td>NSAccessibility / AXUIElement</td>
+<td><a href="https://github.com/mb-dev/macos-ui-automation-mcp" target="_blank" rel="noopener noreferrer">macos-ui-automation-mcp</a>(25 stars、PyObjC)、<a href="https://github.com/mediar-ai/mcp-server-macos-use" target="_blank" rel="noopener noreferrer">mcp-server-macos-use</a>(Swift、アクセシビリティツリーベース)等</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>UIAutomation</td>
+<td><a href="https://github.com/mediar-ai/terminator" target="_blank" rel="noopener noreferrer">Terminator</a>(1.3k stars、"Playwright for Windows"、Rust/TS/Python対応、MCP統合)</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>AT-SPI2 (pyatspi)</td>
+<td><a href="https://github.com/isac322/kwin-mcp" target="_blank" rel="noopener noreferrer">kwin-mcp</a>(KDE Plasma 6 Wayland、29ツール、分離KWinセッション)</td>
+</tr>
+<tr>
+<td>Electron (全OS)</td>
+<td>Chromium Accessibility</td>
+<td>circuit-mcp、Playwright MCPフォーク等(上記Electronセクション参照)</td>
+</tr>
+</tbody>
+</table>
+<p>特にWindows向け<a href="https://github.com/mediar-ai/terminator" target="_blank" rel="noopener noreferrer">Terminator</a>はUIAutomation APIを活用し95%の操作成功率とビジョンのみのアプローチの100倍の速度を主張しておりデスクトップアクセシビリティ自動化の成熟を示しています。</p>
+<h3 id="%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%82%B9%E3%83%88%E3%83%A9%E3%82%AF%E3%83%81%E3%83%A3%2Fdevops-e2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E3%82%B9%E3%83%88%E3%83%A9%E3%82%AF%E3%83%81%E3%83%A3%2Fdevops-e2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">インフラストラクチャ/DevOps E2Eテスト</a></h3>
+<p>インフラの変更はアプリケーションコードの変更と同様にエージェントが行いますが、ミスの影響が甚大(本番環境の破壊、セキュリティホールの作成)です。決定論的ツールによる検証が特に重要です。</p>
+<h4 id="terraform" tabindex="-1"><a href="#terraform" class="header-anchor">Terraform</a></h4>
+<p><a href="https://developer.hashicorp.com/terraform/language/tests" target="_blank" rel="noopener noreferrer">terraform test</a>(ネイティブテストフレームワーク)はTerraform v1.6+で利用可能です。HCLで記述するためエージェントが自然に読み書きできます。</p>
+<p><a href="https://github.com/open-policy-agent/conftest" target="_blank" rel="noopener noreferrer">Conftest + OPA</a>は<code>terraform plan</code>の出力に対するポリシーチェックを実行します。Regoで書かれたポリシーにより「パブリックS3バケットの作成禁止」「本番環境でのインスタンスサイズ下限」等のガードレールを決定論的に強制します。</p>
+<p><a href="https://terratest.gruntwork.io/" target="_blank" rel="noopener noreferrer">Terratest</a>はGoで記述する統合テストフレームワークです。サンドボックス環境で実際のインフラを作成し自動テスト後に破棄します。</p>
+<h4 id="docker" tabindex="-1"><a href="#docker" class="header-anchor">Docker</a></h4>
+<p><a href="https://github.com/GoogleContainerTools/container-structure-test" target="_blank" rel="noopener noreferrer">container-structure-test</a>(Google)はコンテナイメージの構造を検証するYAML/JSON定義のテストです。</p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml"># container-structure-test.yaml
+schemaVersion: "2.0.0"
+commandTests:
+  - name: "node version"
+    command: "node"
+    args: ["--version"]
+    expectedOutput: ["v20\\..*"]
+fileExistenceTests:
+  - name: "app entrypoint exists"
+    path: "/app/index.js"
+    shouldExist: true
+metadataTest:
+  exposedPorts: ["3000"]
+  cmd: ["node", "index.js"]
+</code></pre>
+<h4 id="kubernetes" tabindex="-1"><a href="#kubernetes" class="header-anchor">Kubernetes</a></h4>
+<p><a href="https://github.com/yannh/kubeconform" target="_blank" rel="noopener noreferrer">kubeconform</a>はKubernetesマニフェストをスキーマ検証します。実行環境不要で高速です。ConftestによりKubernetesマニフェストに対してもOPAポリシーを適用可能です。</p>
+<h4 id="%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9e2e%E3%81%AE%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" tabindex="-1"><a href="#%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9e2e%E3%81%AE%E8%A8%AD%E8%A8%88%E5%88%A4%E6%96%AD" class="header-anchor">インフラE2Eの設計判断</a></h4>
+<p>エージェントにインフラ変更を許可する場合、以下のガードレールが不可欠です。</p>
+<ol>
+<li>PreToolUse Hookで<code>terraform apply</code>や<code>kubectl apply</code>を本番環境に対して直接実行することをブロック</li>
+<li>Stop Hookで<code>terraform test</code>、<code>conftest test</code>、<code>kubeconform</code>を実行しパスするまでエージェントを完了させない</li>
+<li><code>terraform plan</code>の出力をConftest経由でポリシーチェックし、AI → CI検証 → OPA承認 → マージ → ArgoCD適用のフローを構築</li>
+<li>container-structure-testでDockerイメージの構造検証をCI必須にする</li>
+</ol>
+<h3 id="ai%2Fml%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#ai%2Fml%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3e2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">AI/MLパイプラインE2Eテスト</a></h3>
+<p>エージェントがAI/MLパイプラインを構築・変更する場合、コードの正しさだけでなくデータ品質・モデル性能・パイプライン全体の整合性を検証する必要があります。テストは<strong>データ品質</strong>、<strong>モデル評価（ベンチマーク）</strong>、<strong>アプリケーション品質（LLM）</strong>、<strong>エージェント評価</strong>、<strong>安全性・ガードレール</strong>、<strong>可観測性・ドリフト検出</strong>の6レイヤーに分かれます。</p>
+<h4 id="%E3%83%87%E3%83%BC%E3%82%BF%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%91%E3%82%A4%E3%83%97%E3%83%A9%E3%82%A4%E3%83%B3%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">データパイプラインテスト</a></h4>
+<p><a href="https://greatexpectations.io/" target="_blank" rel="noopener noreferrer">GX（Great Expectations）</a>はPythonベースのデータ品質検証フレームワークです（v1.14.0、11.2k stars）。<a href="https://greatexpectations.io/blog/introducing-gx-core-1-0/" target="_blank" rel="noopener noreferrer">GX Core 1.0</a>（2024年8月）でアーキテクチャが根本的に刷新され、Data Source / Data Asset / Batch Definitionの3層構造に再設計されました。<a href="https://greatexpectations.io/gx-cloud/" target="_blank" rel="noopener noreferrer">GX Cloud</a>（マネージドSaaS）ではExpectAI（AI支援によるExpectation自動生成）やアノマリ検出が利用可能です。</p>
+<p><a href="https://docs.getdbt.com/docs/build/data-tests" target="_blank" rel="noopener noreferrer">dbt Tests</a>はSQLベースのデータ変換テストです（dbt Core v1.11.7）。dbt 1.8+では<a href="https://docs.getdbt.com/docs/build/unit-tests" target="_blank" rel="noopener noreferrer">ユニットテスト</a>が一級機能として追加され、<code>tests:</code>キーは<code>data_tests:</code>にリネームされました。dbtのテストベストプラクティスは「全モデルの主キーに<code>unique</code> + <code>not_null</code>」「ソースデータの前提をテスト」「<a href="https://www.datafold.com/blog/7-dbt-testing-best-practices/" target="_blank" rel="noopener noreferrer">リスクベースのアプローチ</a>」であり、一律の数値目標ではありません。<a href="https://hub.getdbt.com/metaplane/dbt_expectations/latest/" target="_blank" rel="noopener noreferrer">dbt-expectations</a>（現在は<a href="https://github.com/metaplane/dbt-expectations" target="_blank" rel="noopener noreferrer">Metaplane</a>がメンテナンス、v0.10.10）はGXスタイルのExpectationをdbtマクロとして提供します。</p>
+<p>なお、dbt Labsは2025年10月に<a href="https://www.getdbt.com/blog/dbt-labs-and-fivetran-sign-definitive-agreement-to-merge" target="_blank" rel="noopener noreferrer">Fivetranとの合併を発表</a>しています（規制承認待ち）。FivetranはSQLMeshの開発元である<a href="https://www.fivetran.com/press/fivetran-acquires-tobiko-data-to-power-the-next-generation-of-advanced-ai-ready-data-transformation" target="_blank" rel="noopener noreferrer">Tobiko Dataも2025年9月に買収</a>しており、主要なデータ変換OSSが同一傘下に入る動きが進んでいます。</p>
+<p>データ品質の競合としては、<a href="https://github.com/sodadata/soda-core" target="_blank" rel="noopener noreferrer">Soda Core</a>（v4.1.1、YAML/SodaCL言語ベース、「Data Contracts engine」にピボット）や<a href="https://github.com/elementary-data/elementary" target="_blank" rel="noopener noreferrer">Elementary</a>（dbtネイティブのデータ可観測性）があります。</p>
+<h4 id="%E3%83%A2%E3%83%87%E3%83%AB%E8%A9%95%E4%BE%A1%EF%BC%88%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF%EF%BC%89" tabindex="-1"><a href="#%E3%83%A2%E3%83%87%E3%83%AB%E8%A9%95%E4%BE%A1%EF%BC%88%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF%EF%BC%89" class="header-anchor">モデル評価（ベンチマーク）</a></h4>
+<p><a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank" rel="noopener noreferrer">lm-evaluation-harness</a>（EleutherAI）はLLMの学術ベンチマーク評価のデファクトスタンダードで、HuggingFace Open LLM Leaderboardのバックエンドとして採用され、NVIDIAもNGCコンテナやNeMo Microservicesに統合しています。<a href="https://github.com/EleutherAI/lm-evaluation-harness/releases/tag/v0.4.10" target="_blank" rel="noopener noreferrer">v0.4.10</a>（2026年1月）でCLIがサブコマンド化（<code>lm-eval run</code>、<code>lm-eval ls tasks</code>、<code>lm-eval validate</code>）されYAML設定ファイルに対応しました。同バージョンで軽量コア化の破壊的変更が入り、<code>pip install lm_eval</code>がバックエンドを同梱しなくなり、<code>lm_eval[hf]</code>/<code>lm_eval[vllm]</code>/<code>lm_eval[api]</code>等の明示的インストールが必要になっています。</p>
+<p><a href="https://github.com/huggingface/lighteval" target="_blank" rel="noopener noreferrer">LightEval</a>（Hugging Face、2.3k stars）はHugging Faceが開発する軽量な評価フレームワークで、1,000以上のタスクをサポートしTGIやInference Endpointsとのネイティブ統合に優れます。元々lm-evaluation-harnessの影響を受けて開発されたもので、HFエコシステム内での評価ワークフローに適しています。ただし、Open LLM Leaderboard v2自体は引き続きlm-evaluation-harness（HFフォーク版）をバックエンドとして使用しています。</p>
+<p>両者は競合というより補完関係にあり、lm-evaluation-harnessが学術的再現性と標準化に強く、LightEvalがHFエコシステムとの統合に強いという棲み分けです。アプリケーションレベルの評価やCI/CD統合にはいずれも不向きで、別のツールが適しています。</p>
+<h4 id="%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%93%81%E8%B3%AA%E8%A9%95%E4%BE%A1%EF%BC%88llm%EF%BC%89" tabindex="-1"><a href="#%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%93%81%E8%B3%AA%E8%A9%95%E4%BE%A1%EF%BC%88llm%EF%BC%89" class="header-anchor">アプリケーション品質評価（LLM）</a></h4>
+<p>LLMアプリケーションの品質評価ツールは2025〜2026年にかけて急速に成熟しました。</p>
+<p><a href="https://github.com/confident-ai/deepeval" target="_blank" rel="noopener noreferrer">DeepEval</a>（Confident AI、14.0k stars）はpytest互換のLLM評価フレームワークで、60以上のメトリクス（RAG・エージェント・会話・安全性）を提供します。<a href="https://deepeval.com/docs/evaluation-unit-testing-in-ci-cd" target="_blank" rel="noopener noreferrer">CI/CDとの統合</a>がネイティブにサポートされており、<code>deepeval test run</code>コマンドでGitHub Actions等から直接実行可能です。</p>
+<p><a href="https://github.com/promptfoo/promptfoo" target="_blank" rel="noopener noreferrer">promptfoo</a>（10.9k stars）はYAML宣言的設定によるプロンプトテスト・レッドチーミング・脆弱性スキャンを提供し、<a href="https://www.promptfoo.dev/docs/integrations/ci-cd/" target="_blank" rel="noopener noreferrer">CI/CD統合</a>に優れます。50以上の脆弱性プラグインによる自動レッドチーミングが特徴です。</p>
+<p><a href="https://docs.ragas.io/" target="_blank" rel="noopener noreferrer">RAGAS</a>はRAG特化の評価フレームワークで、Context Precision/Recall、Faithfulness、Answer Relevancyなどのメトリクスを提供します。2026年現在ではエージェントワークフロー・ツール使用・SQLの評価にも対応しています。</p>
+<h4 id="%E7%B6%99%E7%B6%9A%E7%9A%84%E8%A9%95%E4%BE%A1%EF%BC%88continuous-evaluation%EF%BC%89" tabindex="-1"><a href="#%E7%B6%99%E7%B6%9A%E7%9A%84%E8%A9%95%E4%BE%A1%EF%BC%88continuous-evaluation%EF%BC%89" class="header-anchor">継続的評価（Continuous Evaluation）</a></h4>
+<p>2026年のエンタープライズ標準として<a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener noreferrer">継続的評価</a>が確立されつつあります。プレデプロイでは閾値ベースの品質ゲート（例：faithfulness &gt;= 0.85、ハルシネーション率 &lt;= 5%）をCI/CDに組み込み、ポストデプロイではドリフト検出・本番トラフィックの継続スコアリングを行うパターンが定着しています。LLM-as-Judgeが自動評価の標準手法となり、<a href="https://www.langchain.com/state-of-agent-engineering" target="_blank" rel="noopener noreferrer">LangChainの調査</a>では53.3%の組織がLLM-as-Judgeを採用、89%がエージェントの可観測性を実装している一方、オフライン評価の実施は52.4%にとどまっています。</p>
+<h4 id="%E5%AE%89%E5%85%A8%E6%80%A7%E3%83%86%E3%82%B9%E3%83%88%E3%83%BB%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB" tabindex="-1"><a href="#%E5%AE%89%E5%85%A8%E6%80%A7%E3%83%86%E3%82%B9%E3%83%88%E3%83%BB%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB" class="header-anchor">安全性テスト・ガードレール</a></h4>
+<p>LLMの安全性テストには専用ツールが不可欠です。</p>
+<p><a href="https://github.com/Azure/PyRIT" target="_blank" rel="noopener noreferrer">Microsoft PyRIT</a>（3.4k stars）はエンタープライズ向けレッドチーミングツールで、<a href="https://devblogs.microsoft.com/foundry/ai-red-teaming-agent-preview/" target="_blank" rel="noopener noreferrer">Azure AI Foundry</a>にAI Red Teaming Agentとして統合されています。20以上の攻撃戦略とAttack Success Rate（ASR）メトリクスを提供します。</p>
+<p><a href="https://github.com/guardrails-ai/guardrails" target="_blank" rel="noopener noreferrer">Guardrails AI</a>はLLM出力バリデーションフレームワークで、Hubから事前構築済みバリデータを組み合わせてInput/Output Guardsを構成します。<a href="https://guardrailsai.com/" target="_blank" rel="noopener noreferrer">Guardrails Index</a>（2025年2月）は24のガードレールを6カテゴリで比較する初のベンチマークです。</p>
+<p><a href="https://github.com/NVIDIA/NeMo-Guardrails" target="_blank" rel="noopener noreferrer">NVIDIA NeMo Guardrails</a>はプログラマブルなガードレールツールキットで、入力・対話・検索のレイルをサポートします。</p>
+<p>Anthropicは<a href="https://www.anthropic.com/research/constitutional-classifiers" target="_blank" rel="noopener noreferrer">Constitutional Classifiers</a>を開発し、3,000時間以上の専門家レッドチーミングでユニバーサル脱獄が見つからなかった実績があります。本番環境での拒否率増加はわずか0.38%、推論オーバーヘッドは23.7%です。</p>
+<p>規制面では<strong>EU AI Act</strong>のハイリスクAI完全義務化が<a href="https://sombrainc.com/blog/ai-regulations-2026-eu-ai-act" target="_blank" rel="noopener noreferrer">2026年8月2日に施行</a>予定であり、品質管理・リスク管理・適合性評価における敵対的テストが義務化されます。<a href="https://www.nist.gov/artificial-intelligence/ai-risk-management-framework" target="_blank" rel="noopener noreferrer">NIST AI RMF</a>のTEVV（Testing, Evaluation, Verification, Validation）も構造的評価アプローチとして確立しています。</p>
+<h4 id="%E3%81%BE%E3%81%A8%E3%82%81" tabindex="-1"><a href="#%E3%81%BE%E3%81%A8%E3%82%81" class="header-anchor">まとめ</a></h4>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>テストツール</th>
+<th>自動化パターン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>データ品質</td>
+<td>GX Core/Cloud, Soda Core, Elementary, dbt Tests</td>
+<td>パイプライン実行時アサーション、Data Contracts</td>
+</tr>
+<tr>
+<td>モデル性能（ベンチマーク）</td>
+<td>lm-evaluation-harness, LightEval, HELM, Inspect AI</td>
+<td>ベースライン比較、YAML宣言的設定</td>
+</tr>
+<tr>
+<td>アプリケーション品質（LLM）</td>
+<td>DeepEval, promptfoo, RAGAS</td>
+<td>pytest/CI統合、LLM-as-Judge</td>
+</tr>
+<tr>
+<td>エージェント評価</td>
+<td>Maxim AI, LangSmith, Arize Phoenix, Langfuse</td>
+<td>トレーシング+オフライン/オンラインeval</td>
+</tr>
+<tr>
+<td>安全性・ガードレール</td>
+<td>PyRIT, promptfoo, Guardrails AI, NeMo Guardrails</td>
+<td>CI/CDゲーティング、Constitutional Classifiers</td>
+</tr>
+<tr>
+<td>可観測性・ドリフト検出</td>
+<td>Arize, WhyLabs, Evidently AI, Langfuse</td>
+<td>リアルタイム監視、自動アラート</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%ABe2e%E5%8E%9F%E5%89%87%E3%81%AE%E3%81%BE%E3%81%A8%E3%82%81" tabindex="-1"><a href="#%E3%83%A6%E3%83%8B%E3%83%90%E3%83%BC%E3%82%B5%E3%83%ABe2e%E5%8E%9F%E5%89%87%E3%81%AE%E3%81%BE%E3%81%A8%E3%82%81" class="header-anchor">ユニバーサルE2E原則のまとめ</a></h3>
+<p>すべてのアプリケーションタイプに共通するパターンを整理します。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/universal-e2e-pattern.png" alt="ユニバーサルE2Eパターン"></p>
+<p>各アプリケーションタイプごとの構造化テキストインターフェースをまとめると以下のようになります。</p>
+<table>
+<thead>
+<tr>
+<th>アプリタイプ</th>
+<th>構造化テキストインターフェース</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web</td>
+<td>アクセシビリティツリー (Playwright/agent-browser)</td>
+</tr>
+<tr>
+<td>Mobile</td>
+<td>アクセシビリティツリー (mobile-mcp/XcodeBuild)</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>標準出力/エラー出力 (bats/pexpect)</td>
+</tr>
+<tr>
+<td>API</td>
+<td>HTTPレスポンス (Hurl)</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>アクセシビリティツリー (Terminator/circuit-mcp/macos-ui-automation-mcp)</td>
+</tr>
+<tr>
+<td>Infra</td>
+<td>Plan出力/スキーマ (terraform test/conftest)</td>
+</tr>
+<tr>
+<td>AI/ML</td>
+<td>評価メトリクス (lm-eval-harness/LightEval/GE)</td>
+</tr>
+</tbody>
+</table>
+<p>共通する原則は検証結果をフィードバックとしてエージェントに返し、自己修正のループを閉じることです。</p>
+<h3 id="%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%BB%E3%83%88%E3%83%A9%E3%83%B3%E3%82%B8%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%A4%9C%E8%A8%BC%E6%88%A6%E7%95%A5" tabindex="-1"><a href="#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%83%BB%E3%83%88%E3%83%A9%E3%83%B3%E3%82%B8%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%A4%9C%E8%A8%BC%E6%88%A6%E7%95%A5" class="header-anchor">アニメーション・トランジションの検証戦略</a></h3>
+<p>スクリーンショットもアクセシビリティツリーもある瞬間の静的状態を表現します。アニメーション、トランジション、スクロール連動UIなど時間軸を持つ振る舞いはこれらでは検証できません。</p>
+<h4 id="%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%83%89%E6%A4%9C%E8%A8%BC%E6%88%A6%E7%95%A5" tabindex="-1"><a href="#%E3%83%AC%E3%82%A4%E3%83%A4%E3%83%BC%E3%83%89%E6%A4%9C%E8%A8%BC%E6%88%A6%E7%95%A5" class="header-anchor">レイヤード検証戦略</a></h4>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>タイミング</th>
+<th>手法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layer 1</td>
+<td>PostToolUse(ms)</td>
+<td><code>getAnimations()</code> APIでアニメーション完了を保証</td>
+</tr>
+<tr>
+<td>Layer 2</td>
+<td>PostToolUse(ms)</td>
+<td>CLS(Cumulative Layout Shift)を計測</td>
+</tr>
+<tr>
+<td>Layer 3</td>
+<td>CI(s)</td>
+<td>アニメーション凍結 + スナップショット比較</td>
+</tr>
+<tr>
+<td>Layer 4</td>
+<td>Stop Hook</td>
+<td>5fpsでフレーム列を撮影 → エージェントが直接視認</td>
+</tr>
+</tbody>
+</table>
+<h4 id="layer-1%3A-getanimations()-api%E3%81%AB%E3%82%88%E3%82%8B%E6%B1%BA%E5%AE%9A%E8%AB%96%E7%9A%84%E6%A4%9C%E8%A8%BC" tabindex="-1"><a href="#layer-1%3A-getanimations()-api%E3%81%AB%E3%82%88%E3%82%8B%E6%B1%BA%E5%AE%9A%E8%AB%96%E7%9A%84%E6%A4%9C%E8%A8%BC" class="header-anchor">Layer 1: getAnimations() APIによる決定論的検証</a></h4>
+<p>Web Animations APIの<code>getAnimations()</code>を使いアニメーション完了を待機してからアサーションを実行します。タイミング依存の<code>waitForTimeout</code>を排除できます。</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Playwrightでのアニメーション完了待機パターン
+async function waitForAnimationsComplete(page: Page, selector: string) {
+  await page.locator(selector).evaluate((el) =&gt; {
+    return Promise.all(
+      el.getAnimations({ subtree: true }).map((a) =&gt; a.finished)
+    );
+  });
+}
+
+// 使用例: モーダルの開閉アニメーション
+test('modal opens with animation', async ({ page }) =&gt; {
+  await page.click('[data-testid="open-modal"]');
+  const modal = page.locator('[role="dialog"]');
+  await waitForAnimationsComplete(page, '[role="dialog"]');
+  await expect(modal).toBeVisible();
+  await expect(modal).toHaveScreenshot('modal-open.png');
+});
+</code></pre>
+<h4 id="layer-2%3A-cls(cumulative-layout-shift)%E3%81%AE%E8%A8%88%E6%B8%AC" tabindex="-1"><a href="#layer-2%3A-cls(cumulative-layout-shift)%E3%81%AE%E8%A8%88%E6%B8%AC" class="header-anchor">Layer 2: CLS(Cumulative Layout Shift)の計測</a></h4>
+<p>PerformanceObserver APIでレイアウトシフトを計測し閾値を超えた場合にテストを失敗させます。</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">async function measureCLS(page: Page, action: () =&gt; Promise&lt;void&gt;): Promise&lt;number&gt; {
+  await page.evaluate(() =&gt; {
+    (window as any).__clsScore = 0;
+    new PerformanceObserver((list) =&gt; {
+      for (const entry of list.getEntries() as any[]) {
+        if (!entry.hadRecentInput) {
+          (window as any).__clsScore += entry.value;
+        }
+      }
+    }).observe({ type: 'layout-shift', buffered: true });
+  });
+  await action();
+  return page.evaluate(() =&gt; (window as any).__clsScore);
+}
+
+test('accordion animation has no layout shift', async ({ page }) =&gt; {
+  const cls = await measureCLS(page, async () =&gt; {
+    await page.click('[data-testid="accordion-toggle"]');
+    await waitForAnimationsComplete(page, '.accordion-content');
+  });
+  expect(cls).toBeLessThan(0.1); // "good" CLS threshold
+});
+</code></pre>
+<h4 id="layer-3%3A-%E3%83%93%E3%82%B8%E3%83%A5%E3%82%A2%E3%83%AB%E3%83%AA%E3%82%B0%E3%83%AC%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3(%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%87%8D%E7%B5%90)" tabindex="-1"><a href="#layer-3%3A-%E3%83%93%E3%82%B8%E3%83%A5%E3%82%A2%E3%83%AB%E3%83%AA%E3%82%B0%E3%83%AC%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3(%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%87%8D%E7%B5%90)" class="header-anchor">Layer 3: ビジュアルリグレッション(アニメーション凍結)</a></h4>
+<p><a href="https://www.chromatic.com/docs/animations/" target="_blank" rel="noopener noreferrer">Chromatic</a>、<a href="https://www.browserstack.com/docs/percy/" target="_blank" rel="noopener noreferrer">Percy</a>、<a href="https://argos-ci.com/" target="_blank" rel="noopener noreferrer">Argos CI</a>はCSSアニメーションを<code>animation: none !important</code>で凍結しトランジションを無効化した状態でスクリーンショット比較を行います。</p>
+<pre class="language-css" tabindex="0"><code class="language-css"><span class="token comment">/* Chromatic/Percyが自動注入するスタイル(概念) */</span>
+<span class="token selector">*, *::before, *::after</span> <span class="token punctuation">{</span>
+  <span class="token property">animation-duration</span><span class="token punctuation">:</span> 0s <span class="token important">!important</span><span class="token punctuation">;</span>
+  <span class="token property">transition-duration</span><span class="token punctuation">:</span> 0s <span class="token important">!important</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h4 id="layer-4%3A-%E4%BD%8Efps%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%82%AD%E3%83%A3%E3%83%97%E3%83%81%E3%83%A3%E3%81%AB%E3%82%88%E3%82%8B%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E8%A6%96%E8%A6%9A%E6%A4%9C%E8%A8%BC" tabindex="-1"><a href="#layer-4%3A-%E4%BD%8Efps%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%82%AD%E3%83%A3%E3%83%97%E3%83%81%E3%83%A3%E3%81%AB%E3%82%88%E3%82%8B%E3%82%A8%E3%83%BC%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%88%E8%A6%96%E8%A6%9A%E6%A4%9C%E8%A8%BC" class="header-anchor">Layer 4: 低FPSフレームキャプチャによるエージェント視覚検証</a></h4>
+<p>マルチモーダルなCoding Agentは画像を直接視認できます。この能力を活かしアニメーションを低FPS(5fps程度)でフレームキャプチャしエージェントにフレーム列として読ませることで「動き」を検証できます。</p>
+<p>2秒のアニメーション × 5fps = 10枚。各フレームはビジョンエンコーダで数百トークン程度に処理されるため合計でも数千トークンと実用的なコストに収まります。</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">async function captureAnimationFrames(
+  page: Page,
+  action: () =&gt; Promise&lt;void&gt;,
+  options: { fps?: number; durationMs?: number; outputDir?: string } = {}
+) {
+  const { fps = 5, durationMs = 2000, outputDir = 'test-results/animation-frames' } = options;
+  const interval = 1000 / fps;
+  const totalFrames = Math.ceil(durationMs / interval);
+  const frames: string[] = [];
+
+  await fs.mkdir(outputDir, { recursive: true });
+
+  const capturePromise = (async () =&gt; {
+    for (let i = 0; i &lt; totalFrames; i++) {
+      const path = `${outputDir}/frame-${String(i).padStart(3, '0')}.png`;
+      await page.screenshot({ path, fullPage: false });
+      frames.push(path);
+      await page.waitForTimeout(interval);
+    }
+  })();
+
+  await action();
+  await capturePromise;
+  return frames;
+}
+</code></pre>
+<h4 id="%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%97%E3%81%B8%E3%81%AE%E7%B5%B1%E5%90%88" tabindex="-1"><a href="#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%89%E3%83%90%E3%83%83%E3%82%AF%E3%83%AB%E3%83%BC%E3%83%97%E3%81%B8%E3%81%AE%E7%B5%B1%E5%90%88" class="header-anchor">フィードバックループへの統合</a></h4>
+<p>毎回フレームキャプチャを実行すると重いですが「アニメーションに影響しうる変更があったときだけ」に絞れば実用的です。<code>git diff</code>で変更スコープを判定します。</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'git diff --name-only HEAD | grep -qE \"\\.(css|scss|less)$|animation|transition|motion|framer\" &amp;&amp; npx playwright test --grep @animation --reporter=line 2&gt;&amp;1 | tail -30 || echo \"No animation-related changes, skipping.\"'"
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>モバイルでのアニメーション検証はiOSでは<code>XCTOSSignpostMetric</code>でアニメーションのハンクやフレームドロップを計測でき、Androidでは<code>dumpsys gfxinfo</code>で同様のフレーム統計を取得可能です。</p>
+<p>E2Eテスト戦略をここまで網羅的に見てきました。では次に、セッションをまたいだ状態管理の話に移りましょう。</p>
+<h2 id="6%3A-%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E7%8A%B6%E6%85%8B%E7%AE%A1%E7%90%86%E3%82%92%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" tabindex="-1"><a href="#6%3A-%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E7%8A%B6%E6%85%8B%E7%AE%A1%E7%90%86%E3%82%92%E8%A8%AD%E8%A8%88%E3%81%99%E3%82%8B" class="header-anchor">6: セッション間の状態管理を設計する</a></h2>
+<h3 id="%E5%95%8F%E9%A1%8C%E3%81%AE%E6%A7%8B%E9%80%A0" tabindex="-1"><a href="#%E5%95%8F%E9%A1%8C%E3%81%AE%E6%A7%8B%E9%80%A0" class="header-anchor">問題の構造</a></h3>
+<p>エージェントの各セッションは前のセッションの記憶を持ちません。シフト制の工場で毎回新しい作業員が何も引き継ぎなしに来るのと同じ状況です。</p>
+<h3 id="%E8%B5%B7%E5%8B%95%E3%83%AB%E3%83%BC%E3%83%81%E3%83%B3%E3%82%92%E6%A8%99%E6%BA%96%E5%8C%96%E3%81%99%E3%82%8B" tabindex="-1"><a href="#%E8%B5%B7%E5%8B%95%E3%83%AB%E3%83%BC%E3%83%81%E3%83%B3%E3%82%92%E6%A8%99%E6%BA%96%E5%8C%96%E3%81%99%E3%82%8B" class="header-anchor">起動ルーチンを標準化する</a></h3>
+<p><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener noreferrer">Anthropic</a>のパターンとして各セッションの開始時にエージェントが以下を実行します。</p>
+<ol>
+<li>作業ディレクトリの確認</li>
+<li>Gitログと進捗ファイルの読み取り</li>
+<li>機能リストから次の最優先タスクの選択</li>
+<li>開発サーバーの起動と基本機能の疎通テスト</li>
+</ol>
+<p>このルーチンにより前のセッションが壊れた状態で終わっていた場合でも即座に検出・修復できます。</p>
+<h3 id="git%E3%82%92%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E3%83%96%E3%83%AA%E3%83%83%E3%82%B8%E3%81%A8%E3%81%97%E3%81%A6%E4%BD%BF%E3%81%86" tabindex="-1"><a href="#git%E3%82%92%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E9%96%93%E3%81%AE%E3%83%96%E3%83%AA%E3%83%83%E3%82%B8%E3%81%A8%E3%81%97%E3%81%A6%E4%BD%BF%E3%81%86" class="header-anchor">Gitをセッション間のブリッジとして使う</a></h3>
+<p>各セッション終了時に記述的なコミットメッセージとともにGitコミットします。次のセッションの<code>git log --oneline -20</code>が最も信頼性の高い「何が起きたか」の記録になります。Gitログはコードの変更と一対一で紐づいているため記述的ドキュメントと異なり構造的に腐敗しにくいです。</p>
+<h3 id="%E9%80%B2%E6%8D%97%E8%A8%98%E9%8C%B2%E3%81%ABjson%E3%82%92%E4%BD%BF%E3%81%86" tabindex="-1"><a href="#%E9%80%B2%E6%8D%97%E8%A8%98%E9%8C%B2%E3%81%ABjson%E3%82%92%E4%BD%BF%E3%81%86" class="header-anchor">進捗記録にJSONを使う</a></h3>
+<p>Anthropicの知見として機能リストや進捗記録にはMarkdownよりJSONが適します。モデルがJSON形式のデータを不適切に編集・上書きする可能性はMarkdownより低いです。ただしこれは短期プロジェクト向けの手法であり長期プロジェクトでは機能リスト自体が腐敗するリスクを考慮しテストスイート自体を機能リストの代替とすることを検討すべきです。</p>
+<p>セッション管理の次は、最後の原則としてプラットフォーム固有のハーネス戦略を見ていきましょう。</p>
+<h2 id="7%3A-%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%88%A6%E7%95%A5%E3%82%92%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B%3A-codex-vs-claude-code" tabindex="-1"><a href="#7%3A-%E3%83%97%E3%83%A9%E3%83%83%E3%83%88%E3%83%95%E3%82%A9%E3%83%BC%E3%83%A0%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%88%A6%E7%95%A5%E3%82%92%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8B%3A-codex-vs-claude-code" class="header-anchor">7: プラットフォーム固有のハーネス戦略を理解する: Codex vs Claude Code</a></h2>
+<h3 id="%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%8C%E3%83%A2%E3%83%87%E3%83%AB%E3%82%88%E3%82%8A%E9%87%8D%E8%A6%81" tabindex="-1"><a href="#%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E3%81%8C%E3%83%A2%E3%83%87%E3%83%AB%E3%82%88%E3%82%8A%E9%87%8D%E8%A6%81" class="header-anchor">ハーネスがモデルより重要</a></h3>
+<p><a href="https://www.morphllm.com/best-ai-model-for-coding" target="_blank" rel="noopener noreferrer">Morphの分析</a>は衝撃的です。同じモデルでもハーネスを変えるとSWE-benchスコアが22ポイント変動しますが、モデルの交換では1ポイントしか変わりません。プラットフォーム選択そのものよりも、選んだプラットフォームの固有機能をどこまでハーネスに組み込めるかが生産性を決定します。</p>
+<h3 id="%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%81%AE%E6%A0%B9%E6%9C%AC%E7%9A%84%E9%81%95%E3%81%84" tabindex="-1"><a href="#%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E3%81%AE%E6%A0%B9%E6%9C%AC%E7%9A%84%E9%81%95%E3%81%84" class="header-anchor">アーキテクチャの根本的違い</a></h3>
+<p><a href="https://muraco.ai/en/articles/harness-engineering-claude-code-codex/" target="_blank" rel="noopener noreferrer">Codexは「密室型」</a>です。コードのコピーをクラウドサンドボックス(ネットワーク隔離コンテナ)に持ち込み、独立して作業し完成した差分を返します。複数タスクを非同期で並列実行できます。</p>
+<p>Claude Codeは「作業場型」です。開発者の環境に直接入り、ファイル編集・コマンド実行をローカルで行います。Hooksシステムにより、ツール実行のbefore/afterで決定論的制御を挿入できます。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/codex-vs-claude-code.png" alt="Codex vs Claude Code アーキテクチャ比較"></p>
+<h3 id="codex%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD" tabindex="-1"><a href="#codex%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD" class="header-anchor">Codex固有のハーネス機能</a></h3>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>説明</th>
+<th>ハーネスへの影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>クラウドサンドボックス実行</td>
+<td>ネットワーク隔離コンテナでの並列タスク実行</td>
+<td>AGENTS.mdの指示がサンドボックス内で忠実に再現されるため、ローカル環境差異を排除したハーネス設計が可能</td>
+</tr>
+<tr>
+<td>非同期タスクキュー</td>
+<td><code>codex cloud exec</code>による複数タスクの同時バックグラウンド実行</td>
+<td>1つのAGENTS.mdで複数タスクを並列投入でき、ハーネスの検証サイクルが高速化</td>
+</tr>
+<tr>
+<td><a href="https://developers.openai.com/codex/app/automations/" target="_blank" rel="noopener noreferrer">Automations</a></td>
+<td>定期実行タスクの自動スケジューリング（現時点ではアプリ起動中のローカル実行）</td>
+<td>AGENTS.mdに基づくリンター実行やコード品質スキャンを定期タスク化できる</td>
+</tr>
+<tr>
+<td><a href="https://openai.com/index/unlocking-the-codex-harness/" target="_blank" rel="noopener noreferrer">App Serverプロトコル</a></td>
+<td>双方向JSON-RPCで全クライアント表面（CLI・VSCode・Web）を統一</td>
+<td>どのクライアントからでも同一のAGENTS.md・サンドボックス設定が適用される</td>
+</tr>
+<tr>
+<td><a href="https://developers.openai.com/codex/app-server/" target="_blank" rel="noopener noreferrer">リアルタイムステアリング</a></td>
+<td><code>turn/steer</code>メソッドで実行中のエージェントに追加指示を送信</td>
+<td>長時間タスクの途中でハーネス指示を補正でき、タスク再実行コストを削減</td>
+</tr>
+<tr>
+<td><a href="https://developers.openai.com/codex/guides/agents-sdk/" target="_blank" rel="noopener noreferrer">Agents SDK統合</a></td>
+<td><code>codex mcp-server</code>でCodex CLIをMCPサーバーとして公開</td>
+<td>外部オーケストレーターからCodexタスクをプログラマティックに呼び出せる</td>
+</tr>
+<tr>
+<td><a href="https://developers.openai.com/codex/config-advanced/" target="_blank" rel="noopener noreferrer"><code>notify</code>フック</a></td>
+<td>タスク完了時に外部コマンドを実行（JSONペイロード）</td>
+<td>現時点で唯一のイベントフック。<code>agent-turn-complete</code>イベントのみ対応</td>
+</tr>
+</tbody>
+</table>
+<p>Codex には Claude Code の PreToolUse/PostToolUse のような「ツール実行の前後に介入する」仕組みはまだ存在しません。唯一のフック的機能が<a href="https://developers.openai.com/codex/config-advanced/" target="_blank" rel="noopener noreferrer"><code>notify</code></a>で、<code>~/.codex/config.toml</code>に以下のように設定します。</p>
+<pre class="language-toml" tabindex="0"><code class="language-toml">notify = ["python3", "/path/to/notify.py"]
+</code></pre>
+<p><code>notify</code>は<code>agent-turn-complete</code>イベント発火時に外部コマンドを呼び出し、<code>type</code>、<code>thread-id</code>、<code>input-messages</code>、<code>last-assistant-message</code>等を含むJSONペイロードを渡します。デスクトップ通知やSlack webhook には十分ですが、ツール実行前にリンターを走らせるといった品質ゲートには使えません。</p>
+<p><a href="https://github.com/openai/codex/discussions/2150" target="_blank" rel="noopener noreferrer">GitHub Discussion #2150</a>では83人以上がClaude Code相当のHooksシステムをリクエストしており、<a href="https://github.com/openai/codex/issues/2109" target="_blank" rel="noopener noreferrer">Issue #2109</a>には475以上のupvoteが付いています。OpenAIは<a href="https://github.com/openai/codex/issues/12524" target="_blank" rel="noopener noreferrer">Issue #12524</a>で「より汎用的なイベントフック機能を開発中で、現行の<code>notify</code>は将来的に非推奨にする予定」と回答しています。コミュニティからは包括的なHooksシステムの<a href="https://github.com/openai/codex/pull/9796" target="_blank" rel="noopener noreferrer">PR</a>も提出されましたが、「現在feature contributionは受け付けていない」としてクローズされました。</p>
+<p>ではCodexユーザーはどう対処しているのでしょうか。現状のアプローチは「予防型」です。AGENTS.mdにルールを明文化し、プリコミットフックとリンターでインフラレベルで品質を強制します。Claude Codeのように「ファイル編集のたびにリンターが走る」リアクティブなループは作れないため、タスク完了後にまとめてリント実行 → 違反があればCodexに再度修正タスクを投げる、というバッチ的なワークフローになります。<a href="https://github.com/leonardsellem/codex-subagents-mcp" target="_blank" rel="noopener noreferrer">codex-subagents-mcp</a>のようにMCPサーバー経由で専門サブエージェント(レビュアー、デバッガー、セキュリティ監査)をspawnするアプローチも試みられていますが、これもnotifyフックではなくMCPのdelegate呼び出しを使ったもので、ツール実行前後への介入とは異なります。</p>
+<p>この差がハーネスエンジニアリングの観点では決定的です。次のClaude Code固有の機能表と見比べると、その差が明確に見えてきます。</p>
+<h3 id="claude-code%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD" tabindex="-1"><a href="#claude-code%E5%9B%BA%E6%9C%89%E3%81%AE%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9%E6%A9%9F%E8%83%BD" class="header-anchor">Claude Code固有のハーネス機能</a></h3>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>説明</th>
+<th>ハーネスへの影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener noreferrer">Hooksシステム</a></td>
+<td>PreToolUse/PostToolUse/Stop/PreCompact等のライフサイクルフック</td>
+<td>最大の差別化要因。決定論的品質ゲートを毎回のツール実行で強制</td>
+</tr>
+<tr>
+<td>PreToolUseブロッキング</td>
+<td>ツール実行前にアクションを決定論的にブロック</td>
+<td><code>.env</code>編集禁止、<code>rm -rf</code>防止等のセキュリティポリシーを機械的に強制</td>
+</tr>
+<tr>
+<td>PostToolUse品質ループ</td>
+<td>ファイル編集のたびにリンター→JSON additionalContext注入→自己修正</td>
+<td>「ほぼ毎回」と「例外なく毎回」の差を埋める</td>
+</tr>
+<tr>
+<td>PreCompactフック</td>
+<td><a href="https://institute.sfeir.com/en/claude-code/claude-code-context-management/optimization/" target="_blank" rel="noopener noreferrer">コンパクション前の重要情報保護</a></td>
+<td>長時間セッションでの情報損失を軽減</td>
+</tr>
+<tr>
+<td><a href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener noreferrer">MCP Tool Search</a></td>
+<td>ツール記述のオンデマンドロードで<a href="https://www.anthropic.com/engineering/advanced-tool-use" target="_blank" rel="noopener noreferrer">コンテキスト消費を最大85%削減</a></td>
+<td>多数のMCPサーバー接続時の性能劣化を防止</td>
+</tr>
+<tr>
+<td><a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener noreferrer">Agent Teams(実験的)</a></td>
+<td>複数セッション間の直接通信と協調</td>
+<td>チームメイト同士の直接メッセージ</td>
+</tr>
+<tr>
+<td><a href="https://stevekinney.com/courses/ai-development/claude-code-plan-mode" target="_blank" rel="noopener noreferrer">Plan Mode</a> + <a href="https://platform.claude.com/docs/en/build-with-claude/extended-thinking" target="_blank" rel="noopener noreferrer">Extended Thinking</a></td>
+<td>読み取り専用の計画モード(トークン40-60%削減)+ 動的思考深度調整</td>
+<td>複雑な設計判断での推論品質向上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E4%B8%A1%E6%96%B9%E3%81%A7%E5%8F%AF%E8%83%BD%E3%81%A0%E3%81%8C%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81%E3%81%8C%E7%95%B0%E3%81%AA%E3%82%8B%E3%82%82%E3%81%AE" tabindex="-1"><a href="#%E4%B8%A1%E6%96%B9%E3%81%A7%E5%8F%AF%E8%83%BD%E3%81%A0%E3%81%8C%E3%82%A2%E3%83%97%E3%83%AD%E3%83%BC%E3%83%81%E3%81%8C%E7%95%B0%E3%81%AA%E3%82%8B%E3%82%82%E3%81%AE" class="header-anchor">両方で可能だがアプローチが異なるもの</a></h3>
+<p>リンター統合: Codexはタスク完了時にバッチでリント実行。Claude Codeはsettings-based PostToolUse Hookでファイル編集のたびにリント→docs準拠JSONの<code>additionalContext</code>として注入→自己修正ループ。Claude Codeの方が粒度が細かいです(ファイル単位 vs タスク単位)。</p>
+<p>E2Eテスト: テスト生成にはClaude Code(フィードバックループで品質向上)、テスト並列実行にはCodex(サンドボックスでの非同期実行)が適します。</p>
+<p>マルチエージェント: 大規模パイプラインにはCodex(Agents SDK + MCP経由のロールベースオーケストレーション)、探索的な協調作業にはClaude Code(Agent Teams)が適します。</p>
+<h3 id="%E3%83%8F%E3%82%A4%E3%83%96%E3%83%AA%E3%83%83%E3%83%89%E6%88%A6%E7%95%A5%3A-%E8%A8%88%E7%94%BB%E3%81%AFclaude-code%E3%80%81%E5%AE%9F%E8%A1%8C%E3%81%AFcodex" tabindex="-1"><a href="#%E3%83%8F%E3%82%A4%E3%83%96%E3%83%AA%E3%83%83%E3%83%89%E6%88%A6%E7%95%A5%3A-%E8%A8%88%E7%94%BB%E3%81%AFclaude-code%E3%80%81%E5%AE%9F%E8%A1%8C%E3%81%AFcodex" class="header-anchor">ハイブリッド戦略: 計画はClaude Code、実行はCodex</a></h3>
+<p>2026年時点で多くのプロフェッショナルは<a href="https://northflank.com/blog/claude-code-vs-openai-codex" target="_blank" rel="noopener noreferrer">Claude Codeで計画・設計 → Codexで並列実行 → Claude Codeでレビュー・改善</a>のハイブリッド構成を採用しています。</p>
+<p>共通ハーネスレイヤー(両プラットフォームで共有):</p>
+<ul>
+<li><a href="https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation" target="_blank" rel="noopener noreferrer">AGENTS.md(AAIF標準、Codex・Cursor・Devin・Gemini CLI・GitHub Copilot等の主要Coding Agentが読み込む共通フォーマット)</a>。Claude CodeではCLAUDE.mdが対応するファイルで、AGENTS.mdはネイティブには読み込まれません。両方を管理する場合はCLAUDE.md内で<a href="https://code.claude.com/docs/en/claude-code-on-the-web" target="_blank" rel="noopener noreferrer"><code>@AGENTS.md</code>と参照してインクルード</a>します</li>
+<li><a href="https://code.claude.com/docs/en/skills" target="_blank" rel="noopener noreferrer">Skills(SKILL.md、Anthropicがオープン標準としてリリースしOpenAIも同一フォーマットを採用)</a></li>
+<li>MCP設定</li>
+<li>ADR、リンター/フォーマッター設定、テストスイート</li>
+</ul>
+<p>プラットフォーム固有レイヤー:</p>
+<ul>
+<li>CLAUDE.md + <code>.claude/settings.json</code>: Claude Code固有のHooks設定、Plan Mode指示、ライフサイクルフック定義</li>
+<li>Codex Automations設定: 定期タスクスケジュール</li>
+<li><code>~/.codex/AGENTS.override.md</code>: リリースフリーズやインシデント対応時にAGENTS.mdを一時的にオーバーライドする高優先度設定</li>
+</ul>
+<h3 id="%E6%84%8F%E6%80%9D%E6%B1%BA%E5%AE%9A%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF" tabindex="-1"><a href="#%E6%84%8F%E6%80%9D%E6%B1%BA%E5%AE%9A%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF" class="header-anchor">意思決定フレームワーク</a></h3>
+<table>
+<thead>
+<tr>
+<th>最優先事項</th>
+<th>推奨</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>品質</td>
+<td>Claude Code主軸</td>
+<td>Hooksによる決定論的品質ゲートは他に代替手段がない</td>
+</tr>
+<tr>
+<td>スループット</td>
+<td>Codex主軸</td>
+<td>非同期サンドボックスでの並列実行は他に代替手段がない</td>
+</tr>
+<tr>
+<td>両方</td>
+<td>Claude Codeでハーネス構築 → Codexでスケール実行</td>
+<td>ハーネスの品質がスケール時の信頼性を決定する</td>
+</tr>
+</tbody>
+</table>
+<h2 id="%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" tabindex="-1"><a href="#%E3%82%A2%E3%83%B3%E3%83%81%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3" class="header-anchor">アンチパターン</a></h2>
+<p>ここまでベストプラクティスを見てきましたが、逆にやってはいけないことも確認しておきましょう。</p>
+<ol>
+<li>プロンプトだけに頼る: エージェントに「テストを書いてからコミットしてね」と書くだけでは不十分です。プリコミットフックでテストの実行を強制しましょう。お願いではなく仕組みで解決します</li>
+<li>リポジトリに説明文書を蓄積する: READMEに「このサービスはXとYに依存している」と書くより、依存関係を型定義やスキーマで表現し構造テストで検証する方が腐敗しません</li>
+<li>AGENTS.md/CLAUDE.mdを巨大にする: WPBoilerplate(WordPressプラグインボイラープレート)の<a href="https://addyosmani.com/blog/agents-md/" target="_blank" rel="noopener noreferrer">AGENTS.mdは1,000行超</a>。最初の質問が投げられる前に大量のコンテキストを消費します。50行以下を目指しましょう</li>
+<li>エージェント専用のインフラを構築する: <a href="https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents" target="_blank" rel="noopener noreferrer">Stripeの教訓</a>が最も一般化可能です。「エージェント専用インフラを構築するな。優れた開発者インフラを構築せよ。エージェントは自動的にその恩恵を受ける」</li>
+<li>ハーネスなしでスケールしようとする: ハーネスなしでエージェントの数を増やすと、<a href="https://thenewstack.io/vibe-coding-agentic-engineering/" target="_blank" rel="noopener noreferrer">複利的なレバレッジではなく複利的な認知的負債が生まれます</a>。まず1つのエージェントでハーネスを磨き、それからスケールしましょう</li>
+</ol>
+<h2 id="%E6%9C%80%E5%B0%8F%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9(mvh%3A-minimum-viable-harness)" tabindex="-1"><a href="#%E6%9C%80%E5%B0%8F%E5%AE%9F%E8%A1%8C%E5%8F%AF%E8%83%BD%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9(mvh%3A-minimum-viable-harness)" class="header-anchor">最小実行可能ハーネス(MVH: Minimum Viable Harness)</a></h2>
+<p>上記の原則を全て一度に導入する必要はありません。以下の順序で段階的に構築していきましょう。</p>
+<p><img src="/img/harness-engineering-best-practices-2026/mvh-roadmap.png" alt="MVHロードマップ"></p>
+<h3 id="week-1" tabindex="-1"><a href="#week-1" class="header-anchor">Week 1</a></h3>
+<ul>
+<li>AGENTS.md/CLAUDE.mdを作成する(ポインタとしてのみ、50行以下を目指す)</li>
+<li>プリコミットフック(Lefthook推奨)でリンター・フォーマッター・型チェックを実行する</li>
+<li>PostToolUse Hookで自動フォーマットを設定する(原則2のJSON例を参照)</li>
+<li>最初のADRを書く</li>
+</ul>
+<h3 id="week-2-4" tabindex="-1"><a href="#week-2-4" class="header-anchor">Week 2-4</a></h3>
+<ul>
+<li>エージェントのミスが発生するたびにテストまたはリンタールールを追加する</li>
+<li>計画→承認→実行のワークフローを確立する</li>
+<li>E2Eテストツールを導入する(Playwright CLI or agent-browser)</li>
+<li>Stop Hookでテスト通過を完了条件にする</li>
+<li>セッション間の起動ルーチンを標準化する</li>
+</ul>
+<h3 id="month-2-3" tabindex="-1"><a href="#month-2-3" class="header-anchor">Month 2-3</a></h3>
+<ul>
+<li>カスタムリンターを構築しエラーメッセージに修正指示を含める(ADR参照つき)</li>
+<li>ADRとリンタールールの紐づけを開始する(archgateパターン)</li>
+<li>記述的ドキュメントをリポジトリから段階的に除去しテストとADRに置き換える</li>
+<li>PreToolUse Hookで安全性ゲートを設定する(機密ファイル保護、破壊的コマンドのブロック)</li>
+</ul>
+<h3 id="month-3%2B" tabindex="-1"><a href="#month-3%2B" class="header-anchor">Month 3+</a></h3>
+<ul>
+<li>Planktonパターン等の高度なフィードバックループを検討する</li>
+<li>ガベージコレクションプロセスを導入する(決定論的ルールに基づく)</li>
+<li>複数エージェントの同時実行を試み自分の管理上限を把握する</li>
+<li>ハーネスの効果を定量的に測定する(PR/日、手戻り率、レビュー指摘率)</li>
+</ul>
+<h2 id="%E3%81%BE%E3%81%A8%E3%82%81-1" tabindex="-1"><a href="#%E3%81%BE%E3%81%A8%E3%82%81-1" class="header-anchor">まとめ</a></h2>
+<ul>
+<li>ハーネスエンジニアリングの核心は「プロンプトではなく仕組みで品質を強制する」こと。リンター、Hooks、テスト、ADRの組み合わせが複利的に効く</li>
+<li>フィードバックは速ければ速いほど良い。PostToolUse Hook(ms) &gt; プリコミット(s) &gt; CI(min) &gt; 人間レビュー(h)の順で可能な限り速いレイヤーにチェックを移動させる</li>
+<li>すべてを一度に導入する必要はない。MVHから始めてエージェントのミスが発生するたびにハーネスを強化していく</li>
+</ul>
+<h2 id="2026-03-11-%E4%BF%AE%E6%AD%A3" tabindex="-1"><a href="#2026-03-11-%E4%BF%AE%E6%AD%A3" class="header-anchor">2026-03-11 修正</a></h2>
+<p>公開後のClaude Code Hooks追試を踏まえて、Hooks章の記述を一部修正しました。この記事で扱うHooks例は<code>.claude/settings.json</code>または<code>.claude/settings.local.json</code>に置くsettings-based hooksを前提とします。また、PostToolUseでフィードバックをClaudeに戻す方法は、通常stdoutではなく<code>hookSpecificOutput.additionalContext</code>を返すdocs準拠JSONに修正しました。frontmatter hooksやplugin / marketplaceの挙動差は別途検証対象として切り分けています。追試に使った再現実験リポジトリは <a href="https://github.com/nyosegawa/claude-hook-experiment" target="_blank" rel="noopener noreferrer">https://github.com/nyosegawa/claude-hook-experiment</a> です。</p>
+<h2 id="references" tabindex="-1"><a href="#references" class="header-anchor">References</a></h2>
+<h3 id="%E4%B8%80%E6%AC%A1%E3%82%BD%E3%83%BC%E3%82%B9" tabindex="-1"><a href="#%E4%B8%80%E6%AC%A1%E3%82%BD%E3%83%BC%E3%82%B9" class="header-anchor">一次ソース</a></h3>
+<ul>
+<li><a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">Harness engineering: leveraging Codex in an agent-first world</a> (OpenAI Engineering Blog)</li>
+<li><a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noopener noreferrer">My AI Adoption Journey</a> (Mitchell Hashimoto)</li>
+<li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener noreferrer">Effective harnesses for long-running agents</a> (Anthropic Engineering)</li>
+<li><a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html" target="_blank" rel="noopener noreferrer">Harness Engineering</a> (Birgitta Böckeler / Thoughtworks)</li>
+<li><a href="https://www.ignorance.ai/p/the-emerging-harness-engineering" target="_blank" rel="noopener noreferrer">The Emerging 'Harness Engineering' Playbook</a> (Charlie Guo)</li>
+<li><a href="https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents" target="_blank" rel="noopener noreferrer">Minions: Stripe's one-shot, end-to-end coding agents</a> (Stripe)</li>
+<li><a href="https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents-part-2" target="_blank" rel="noopener noreferrer">Minions Part 2</a> (Stripe)</li>
+</ul>
+<h3 id="claude-code-%2F-codex" tabindex="-1"><a href="#claude-code-%2F-codex" class="header-anchor">Claude Code / Codex</a></h3>
+<ul>
+<li><a href="https://code.claude.com/docs/en/hooks-guide" target="_blank" rel="noopener noreferrer">Claude Code Hooks Guide</a> (Anthropic)</li>
+<li><a href="https://code.claude.com/docs/en/hooks" target="_blank" rel="noopener noreferrer">Claude Code Hooks Reference</a> (Anthropic)</li>
+<li><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noopener noreferrer">Claude Code Memory</a> (Anthropic)</li>
+<li><a href="https://code.claude.com/docs/en/agent-teams" target="_blank" rel="noopener noreferrer">Agent Teams</a> (Anthropic)</li>
+<li><a href="https://code.claude.com/docs/en/mcp" target="_blank" rel="noopener noreferrer">MCP Tool Search</a> (Anthropic)</li>
+<li><a href="https://www.anthropic.com/engineering/advanced-tool-use" target="_blank" rel="noopener noreferrer">Advanced tool use</a> (Anthropic)</li>
+<li><a href="https://openai.com/index/introducing-codex/" target="_blank" rel="noopener noreferrer">Introducing Codex</a> (OpenAI)</li>
+<li><a href="https://developers.openai.com/codex/app/automations/" target="_blank" rel="noopener noreferrer">Codex Automations</a> (OpenAI)</li>
+<li><a href="https://openai.com/index/unlocking-the-codex-harness/" target="_blank" rel="noopener noreferrer">Codex App Server</a> (OpenAI)</li>
+<li><a href="https://developers.openai.com/codex/guides/agents-sdk/" target="_blank" rel="noopener noreferrer">Codex Agents SDK</a> (OpenAI)</li>
+</ul>
+<h3 id="%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%84%E3%83%BC%E3%83%AB" tabindex="-1"><a href="#%E3%83%AA%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%84%E3%83%BC%E3%83%AB" class="header-anchor">リンターツール</a></h3>
+<ul>
+<li><a href="https://voidzero.dev/posts/announcing-oxlint-1-stable" target="_blank" rel="noopener noreferrer">Oxlint 1.0</a> (VoidZero)</li>
+<li><a href="https://biomejs.dev/blog/biome-v2/" target="_blank" rel="noopener noreferrer">Biome v2.0</a> (Biome)</li>
+<li><a href="https://github.com/astral-sh/ruff" target="_blank" rel="noopener noreferrer">Ruff</a> (Astral)</li>
+<li><a href="https://golangci-lint.run/" target="_blank" rel="noopener noreferrer">golangci-lint</a></li>
+<li><a href="https://github.com/vicnaum/rust-magic-linter" target="_blank" rel="noopener noreferrer">rust-magic-linter</a> (vicnaum)</li>
+<li><a href="https://github.com/realm/SwiftLint" target="_blank" rel="noopener noreferrer">SwiftLint</a> (Realm)</li>
+<li><a href="https://github.com/detekt/detekt" target="_blank" rel="noopener noreferrer">detekt</a></li>
+<li><a href="https://factory.ai/news/using-linters-to-direct-agents" target="_blank" rel="noopener noreferrer">Factory.ai ESLint Plugin</a> (Factory.ai)</li>
+<li><a href="https://github.com/cletusw/eslint-plugin-local-rules" target="_blank" rel="noopener noreferrer">eslint-plugin-local-rules</a></li>
+<li><a href="https://ast-grep.github.io/" target="_blank" rel="noopener noreferrer">ast-grep</a></li>
+<li><a href="https://medium.com/@montes.makes/lint-against-the-machine-a-field-guide-to-catching-ai-coding-agent-anti-patterns-3c4ef7baeb9e" target="_blank" rel="noopener noreferrer">Lint Against the Machine</a> (Montes)</li>
+</ul>
+<h3 id="e2e%E3%83%86%E3%82%B9%E3%83%88" tabindex="-1"><a href="#e2e%E3%83%86%E3%82%B9%E3%83%88" class="header-anchor">E2Eテスト</a></h3>
+<ul>
+<li><a href="https://shipyard.build/blog/playwright-agents-claude-code/" target="_blank" rel="noopener noreferrer">Playwright Agents</a> (Shipyard)</li>
+<li><a href="https://www.awesome-testing.com/2026/03/playwright-cli-skills-and-isolated-agentic-testing" target="_blank" rel="noopener noreferrer">Playwright CLI Agentic Testing</a> (Awesome Testing)</li>
+<li><a href="https://github.com/vercel-labs/agent-browser" target="_blank" rel="noopener noreferrer">agent-browser</a> (Vercel Labs)</li>
+<li><a href="https://www.pulumi.com/blog/self-verifying-ai-agents-vercels-agent-browser-in-the-ralph-wiggum-loop/" target="_blank" rel="noopener noreferrer">agent-browser + Pulumi</a> (Pulumi)</li>
+<li><a href="https://github.com/getsentry/XcodeBuildMCP" target="_blank" rel="noopener noreferrer">XcodeBuildMCP</a> (Sentry)</li>
+<li><a href="https://github.com/mobile-next/mobile-mcp" target="_blank" rel="noopener noreferrer">mobile-mcp</a> (Mobile Next)</li>
+<li><a href="https://github.com/appium/appium-mcp" target="_blank" rel="noopener noreferrer">Appium MCP</a></li>
+<li><a href="https://github.com/wix/Detox" target="_blank" rel="noopener noreferrer">Detox</a> (Wix)</li>
+<li><a href="https://maestro.dev/" target="_blank" rel="noopener noreferrer">Maestro</a></li>
+<li><a href="https://github.com/bats-core/bats-core" target="_blank" rel="noopener noreferrer">bats-core</a></li>
+<li><a href="https://hurl.dev/" target="_blank" rel="noopener noreferrer">Hurl</a> (Orange)</li>
+<li><a href="https://docs.pact.io/" target="_blank" rel="noopener noreferrer">Pact</a></li>
+<li><a href="https://testcontainers.com/" target="_blank" rel="noopener noreferrer">Testcontainers</a></li>
+<li><a href="https://github.com/icefort-ai/circuit-mcp" target="_blank" rel="noopener noreferrer">circuit-mcp</a></li>
+<li><a href="https://github.com/microsoft/playwright-mcp" target="_blank" rel="noopener noreferrer">Playwright MCP (Electron対応開発中)</a></li>
+<li><a href="https://github.com/webdriverio-community/wdio-electron-service" target="_blank" rel="noopener noreferrer">wdio-electron-service</a></li>
+<li><a href="https://github.com/P3GLEG/tauri-plugin-mcp" target="_blank" rel="noopener noreferrer">tauri-plugin-mcp</a></li>
+<li><a href="https://testdriver.ai/" target="_blank" rel="noopener noreferrer">TestDriver.ai</a></li>
+<li><a href="https://github.com/mediar-ai/terminator" target="_blank" rel="noopener noreferrer">Terminator</a></li>
+<li><a href="https://github.com/mb-dev/macos-ui-automation-mcp" target="_blank" rel="noopener noreferrer">macos-ui-automation-mcp</a></li>
+<li><a href="https://github.com/isac322/kwin-mcp" target="_blank" rel="noopener noreferrer">kwin-mcp</a></li>
+</ul>
+<h3 id="%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9-%2F-devops" tabindex="-1"><a href="#%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9-%2F-devops" class="header-anchor">インフラ / DevOps</a></h3>
+<ul>
+<li><a href="https://developer.hashicorp.com/terraform/language/tests" target="_blank" rel="noopener noreferrer">Terraform Test</a> (HashiCorp)</li>
+<li><a href="https://github.com/open-policy-agent/conftest" target="_blank" rel="noopener noreferrer">Conftest</a> (OPA)</li>
+<li><a href="https://terratest.gruntwork.io/" target="_blank" rel="noopener noreferrer">Terratest</a> (Gruntwork)</li>
+<li><a href="https://github.com/GoogleContainerTools/container-structure-test" target="_blank" rel="noopener noreferrer">container-structure-test</a> (Google)</li>
+<li><a href="https://github.com/yannh/kubeconform" target="_blank" rel="noopener noreferrer">kubeconform</a></li>
+</ul>
+<h3 id="ai%2Fml" tabindex="-1"><a href="#ai%2Fml" class="header-anchor">AI/ML</a></h3>
+<h4 id="%E3%83%87%E3%83%BC%E3%82%BF%E5%93%81%E8%B3%AA" tabindex="-1"><a href="#%E3%83%87%E3%83%BC%E3%82%BF%E5%93%81%E8%B3%AA" class="header-anchor">データ品質</a></h4>
+<ul>
+<li><a href="https://greatexpectations.io/" target="_blank" rel="noopener noreferrer">GX Core / GX Cloud</a> (Great Expectations)</li>
+<li><a href="https://github.com/sodadata/soda-core" target="_blank" rel="noopener noreferrer">Soda Core</a> (Soda)</li>
+<li><a href="https://github.com/elementary-data/elementary" target="_blank" rel="noopener noreferrer">Elementary</a> (Elementary Data)</li>
+<li><a href="https://docs.getdbt.com/docs/build/data-tests" target="_blank" rel="noopener noreferrer">dbt Tests / Unit Tests</a> (dbt Labs)</li>
+<li><a href="https://hub.getdbt.com/metaplane/dbt_expectations/latest/" target="_blank" rel="noopener noreferrer">dbt-expectations</a> (Metaplane)</li>
+</ul>
+<h4 id="%E3%83%A2%E3%83%87%E3%83%AB%E8%A9%95%E4%BE%A1%E3%83%BB%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF" tabindex="-1"><a href="#%E3%83%A2%E3%83%87%E3%83%AB%E8%A9%95%E4%BE%A1%E3%83%BB%E3%83%99%E3%83%B3%E3%83%81%E3%83%9E%E3%83%BC%E3%82%AF" class="header-anchor">モデル評価・ベンチマーク</a></h4>
+<ul>
+<li><a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank" rel="noopener noreferrer">lm-evaluation-harness</a> (EleutherAI)</li>
+<li><a href="https://github.com/huggingface/lighteval" target="_blank" rel="noopener noreferrer">LightEval</a> (Hugging Face)</li>
+<li><a href="https://github.com/stanford-crfm/helm" target="_blank" rel="noopener noreferrer">HELM</a> (Stanford CRFM)</li>
+<li><a href="https://github.com/UKGovernmentBEIS/inspect_ai" target="_blank" rel="noopener noreferrer">Inspect AI</a> (UK AISI)</li>
+</ul>
+<h4 id="llm%E8%A9%95%E4%BE%A1%E3%83%BBci%2Fcd%E7%B5%B1%E5%90%88" tabindex="-1"><a href="#llm%E8%A9%95%E4%BE%A1%E3%83%BBci%2Fcd%E7%B5%B1%E5%90%88" class="header-anchor">LLM評価・CI/CD統合</a></h4>
+<ul>
+<li><a href="https://github.com/confident-ai/deepeval" target="_blank" rel="noopener noreferrer">DeepEval</a> (Confident AI)</li>
+<li><a href="https://github.com/promptfoo/promptfoo" target="_blank" rel="noopener noreferrer">promptfoo</a></li>
+<li><a href="https://docs.ragas.io/" target="_blank" rel="noopener noreferrer">RAGAS</a></li>
+<li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener noreferrer">Demystifying Evals for AI Agents</a> (Anthropic)</li>
+<li><a href="https://www.langchain.com/state-of-agent-engineering" target="_blank" rel="noopener noreferrer">State of Agent Engineering</a> (LangChain)</li>
+</ul>
+<h4 id="%E5%AE%89%E5%85%A8%E6%80%A7%E3%83%BB%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB" tabindex="-1"><a href="#%E5%AE%89%E5%85%A8%E6%80%A7%E3%83%BB%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB" class="header-anchor">安全性・ガードレール</a></h4>
+<ul>
+<li><a href="https://github.com/Azure/PyRIT" target="_blank" rel="noopener noreferrer">PyRIT</a> (Microsoft)</li>
+<li><a href="https://github.com/guardrails-ai/guardrails" target="_blank" rel="noopener noreferrer">Guardrails AI</a></li>
+<li><a href="https://github.com/NVIDIA/NeMo-Guardrails" target="_blank" rel="noopener noreferrer">NeMo Guardrails</a> (NVIDIA)</li>
+<li><a href="https://www.anthropic.com/research/constitutional-classifiers" target="_blank" rel="noopener noreferrer">Constitutional Classifiers</a> (Anthropic)</li>
+<li><a href="https://sombrainc.com/blog/ai-regulations-2026-eu-ai-act" target="_blank" rel="noopener noreferrer">EU AI Act Guide 2026</a></li>
+</ul>
+<h4 id="%E5%8F%AF%E8%A6%B3%E6%B8%AC%E6%80%A7%E3%83%BB%E3%83%89%E3%83%AA%E3%83%95%E3%83%88%E6%A4%9C%E5%87%BA" tabindex="-1"><a href="#%E5%8F%AF%E8%A6%B3%E6%B8%AC%E6%80%A7%E3%83%BB%E3%83%89%E3%83%AA%E3%83%95%E3%83%88%E6%A4%9C%E5%87%BA" class="header-anchor">可観測性・ドリフト検出</a></h4>
+<ul>
+<li><a href="https://github.com/evidentlyai/evidently" target="_blank" rel="noopener noreferrer">Evidently AI</a></li>
+<li><a href="https://github.com/langfuse/langfuse" target="_blank" rel="noopener noreferrer">Langfuse</a></li>
+<li><a href="https://github.com/Arize-AI/phoenix" target="_blank" rel="noopener noreferrer">Arize Phoenix</a></li>
+</ul>
+<h3 id="%E3%81%9D%E3%81%AE%E4%BB%96" tabindex="-1"><a href="#%E3%81%9D%E3%81%AE%E4%BB%96" class="header-anchor">その他</a></h3>
+<ul>
+<li><a href="https://www.humanlayer.dev/blog/writing-a-good-claude-md" target="_blank" rel="noopener noreferrer">Writing a good CLAUDE.md</a> (HumanLayer)</li>
+<li><a href="https://arxiv.org/abs/2507.11538" target="_blank" rel="noopener noreferrer">How Many Instructions Can LLMs Follow at Once?</a></li>
+<li><a href="https://addyosmani.com/blog/agents-md/" target="_blank" rel="noopener noreferrer">Stop Using /init for AGENTS.md</a> (Addy Osmani)</li>
+<li><a href="https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals" target="_blank" rel="noopener noreferrer">AGENTS.md outperforms skills</a> (Vercel)</li>
+<li><a href="https://github.com/archgate/cli" target="_blank" rel="noopener noreferrer">archgate</a></li>
+<li><a href="https://adr.github.io/" target="_blank" rel="noopener noreferrer">ADR</a> (Michael Nygard)</li>
+<li><a href="https://liambx.com/blog/ai-agent-lint-enforcement-lefthook-claude-code" target="_blank" rel="noopener noreferrer">Lefthook + Claude Code</a></li>
+<li><a href="https://github.com/affaan-m/everything-claude-code" target="_blank" rel="noopener noreferrer">Plankton / everything-claude-code</a></li>
+<li><a href="https://www.morphllm.com/context-rot" target="_blank" rel="noopener noreferrer">What Is Context Rot?</a> (Morph)</li>
+<li><a href="https://www.morphllm.com/best-ai-model-for-coding" target="_blank" rel="noopener noreferrer">Best AI Model for Coding</a> (Morph)</li>
+<li><a href="https://muraco.ai/en/articles/harness-engineering-claude-code-codex/" target="_blank" rel="noopener noreferrer">Harness Engineering 101</a> (muraco.ai)</li>
+<li><a href="https://northflank.com/blog/claude-code-vs-openai-codex" target="_blank" rel="noopener noreferrer">Claude Code vs OpenAI Codex</a> (Northflank)</li>
+<li><a href="https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation" target="_blank" rel="noopener noreferrer">AAIF</a> (Linux Foundation)</li>
+<li><a href="https://www.apple.com/newsroom/2026/02/xcode-26-point-3-unlocks-the-power-of-agentic-coding/" target="_blank" rel="noopener noreferrer">Xcode 26.3 Agentic Coding</a> (Apple)</li>
+<li><a href="https://thenewstack.io/vibe-coding-agentic-engineering/" target="_blank" rel="noopener noreferrer">From vibes to engineering</a> (The New Stack)</li>
+<li><a href="https://www.chromatic.com/docs/animations/" target="_blank" rel="noopener noreferrer">Chromatic Animation Docs</a></li>
+<li><a href="https://lobehub.com/mcp/joshuayoes-ios-simulator-mcp" target="_blank" rel="noopener noreferrer">iOS Simulator MCP Server</a></li>
+</ul>
+
+  </div>
+
+
+</article>
+
+<nav class="page-pagination pagination">
+  <ul>    <li class="pagination-prev">
+      <a href="/posts/not-building-in-agent-era/" rel="prev">
+        <span>← 前の記事</span>
+        <strong>Coding Agent時代に、開発速度を遅くする</strong>
+      </a>
+    </li>
+    <li class="pagination-next">
+      <a href="/posts/coding-agent-workflow-2026/" rel="next">
+        <span>次の記事 →</span>
+        <strong>Coding Agent時代の開発ワークフローについてのまとめ</strong>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+    </main>
+
+    <!-- Current page: /posts/harness-engineering-best-practices-2026/ -->
+  
+
+</body></html>

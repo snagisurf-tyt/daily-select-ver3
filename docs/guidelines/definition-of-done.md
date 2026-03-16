@@ -150,6 +150,52 @@ Gate が失敗した場合、以下の規則に従う:
 
 ---
 
+## フィードバック速度の階層（提案E）
+
+品質を決定するのはフィードバックの速さ。フィードバックが遅いほど修正コストが高くなる。
+
+| 階層 | タイミング | 手段 | 目標速度 |
+|------|----------|------|---------|
+| **L1: 最速** | ファイル編集直後 | PostToolUse Hook（リント・フォーマット自動実行） | ミリ秒〜秒 |
+| **L2: 速** | コミット直前 | プリコミットフック（Lefthook / Husky） | 秒〜数十秒 |
+| **L3: 遅** | PR作成後 | CI（GitHub Actions 等） | 分 |
+| **L4: 最遅** | リリース前後 | 人間によるコードレビュー・QA | 時間〜日 |
+
+### L1: PostToolUse Hook の設定
+
+`.claude/settings.json` の `hooks.PostToolUse` でファイル編集後に自動実行:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "hooks": [{"type": "command", "command": "npm run lint --silent 2>&1 | head -30 || true"}]
+    }]
+  }
+}
+```
+
+### L2: プリコミットフックの設定例（Lefthook）
+
+```yaml
+# lefthook.yml
+pre-commit:
+  commands:
+    lint:
+      run: npm run lint
+    typecheck:
+      run: npm run typecheck
+```
+
+インストール:
+```bash
+npm install --save-dev lefthook
+npx lefthook install
+```
+
+---
+
 ## Playwright テンプレートのセットアップ手順（参考）
 
 プロジェクトで Playwright を有効化するには:

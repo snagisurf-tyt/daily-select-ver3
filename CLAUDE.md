@@ -23,9 +23,8 @@
 - 技術スタック選定: `docs/guidelines/tech-stack-guidelines.md` を参照
 - ディレクトリ構造: `docs/guidelines/repository-structure-guidelines.md` を参照
 
-## 開発時の注意点
+## 開発ガイドライン
 
-- アプリのホストIPは、127.0.0.1 や 0.0.0.0 でなく、localhost あるいは 固定IP を使うこと。
-- Pythonの仮想環境構築にはuvを使用する。ライブラリの追加は`uv add [パッケージ名] --link-mode=copy`コマンドを使う。
-- 環境変数や設定値 `.env`または`.env.local`で一元管理する。ソースコード内に直接書かないこと。
-- フロントエンドとバックエンドのシステムは完全に独立設計する。両者はAPIを介して通信する。
+- コーディング規約・AI生成コードのアンチパターン・ドキュメント管理戦略: `docs/guidelines/development-guidelines.md`
+- アーキテクチャ意思決定の記録: `docs/adr/`
+- フィードバック速度の階層とDoD: `docs/guidelines/definition-of-done.md`
