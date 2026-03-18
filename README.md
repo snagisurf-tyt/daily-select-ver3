@@ -6,6 +6,7 @@
     - [3. アプリを実装する](#3-アプリを実装する)
     - [4. アプリの機能追加・バグ修正をする](#4-アプリの機能追加バグ修正をする)
   - [主要なコマンド](#主要なコマンド)
+  - [Hooks による品質自動チェック](#hooks-による品質自動チェック)
   - [ディレクトリ構成](#ディレクトリ構成)
   - [tests/ ディレクトリについて](#tests-ディレクトリについて)
     - [品質ゲートとの関係](#品質ゲートとの関係)
@@ -80,6 +81,16 @@
 | `/resume-work` | 中断した作業をチェックポイントから再開する |
 | `/review-docs <パス>` | ドキュメントをサブエージェントで精査する |
 
+## Hooks による品質自動チェック
+
+`.claude/settings.json` に設定された PostToolUse Hook により、ファイル編集後にリンターが自動実行されます。これにより品質チェックが「指示」ではなく「仕組み」として100%実行されます。
+
+| Hook | トリガー | 実行内容 |
+|------|---------|---------|
+| PostToolUse | `Edit` / `Write` ツール実行後 | `npm run lint`（`package.json` 存在時のみ） |
+
+プロジェクトのテックスタックに応じて `.claude/settings.json` の `hooks` セクションをカスタマイズしてください。詳細は [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) の「フィードバック速度の階層」を参照。
+
 ## ディレクトリ構成
 
 /add-feature および /add-feature-ui コマンドの実行により、以下のディレクトリ構成が自動生成される:
@@ -90,6 +101,8 @@
 .claude/skills/     # スキル定義
 .claude/rules/      # 常時有効なガードレール（全会話に自動注入）
 docs/               # プロジェクト永続ドキュメント（/setup-project で生成）
+docs/adr/           # アーキテクチャ意思決定記録（ADR）
+docs/guidelines/    # 開発ガイドライン・品質定義・技術スタック選定
 .steering/          # 作業単位のタスク管理（/add-feature で生成）
 src/                # ソースコード（/add-feature で生成）
 tests/              # テストコード（下記参照）
@@ -116,9 +129,12 @@ tests/              # テストコード（下記参照）
 ## 参考ドキュメント
 
 - [SDD-workflow.md](SDD-workflow.md) — 全体ワークフロー図
-- [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) — 品質ゲートの定義
+- [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) — 品質ゲートの定義・フィードバック速度の階層
+- [docs/guidelines/development-guidelines.md](docs/guidelines/development-guidelines.md) — 開発ガイドライン・AIアンチパターン・ドキュメント管理戦略
 - [docs/guidelines/repository-structure-guidelines.md](docs/guidelines/repository-structure-guidelines.md) — ディレクトリ構造
 - [docs/guidelines/tech-stack-guidelines.md](docs/guidelines/tech-stack-guidelines.md) — 技術スタック選定ガイドライン
+- [docs/adr/README.md](docs/adr/README.md) — ADR（アーキテクチャ意思決定記録）の運用ルール
+- [docs/sdd-workflow/04_Harness-engineering-improvements.md](docs/sdd-workflow/04_Harness-engineering-improvements.md) — Harness Engineering ベストプラクティスに基づく改善記録
 
 
 --------------
