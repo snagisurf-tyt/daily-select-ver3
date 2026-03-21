@@ -156,36 +156,60 @@ Gate が失敗した場合、以下の規則に従う:
 
 | 階層 | タイミング | 手段 | 目標速度 |
 |------|----------|------|---------|
+| **L0: 即時** | ツール実行前 | PreToolUse Hook（設定ファイル保護・機密ファイル保護・--no-verify禁止） | ミリ秒 |
 | **L1: 最速** | ファイル編集直後 | PostToolUse Hook（リント・フォーマット自動実行） | ミリ秒〜秒 |
 | **L2: 速** | コミット直前 | プリコミットフック（Lefthook / Husky） | 秒〜数十秒 |
 | **L3: 遅** | PR作成後 | CI（GitHub Actions 等） | 分 |
 | **L4: 最遅** | リリース前後 | 人間によるコードレビュー・QA | 時間〜日 |
 
+### L0: PreToolUse Hook（Safety Gates）
+
+`.claude/settings.json` の `hooks.PreToolUse` で危険な操作を事前にブロック:
+
+- **設定ファイル保護**: リンター設定（`.eslintrc*`, `biome.json`, `tsconfig.json` 等）の編集をブロック。エージェントがリンターエラーを設定変更で回避することを防止
+- **機密ファイル保護**: `.env*`, `credentials*`, `*.key` の編集をブロック
+- **`--no-verify` 禁止**: `git commit --no-verify` をブロックし、プリコミットフックのバイパスを防止
+
 ### L1: PostToolUse Hook の設定
 
-`.claude/settings.json` の `hooks.PostToolUse` でファイル編集後に自動実行:
+`.claude/hooks/post-lint.sh` がファイル編集後に自動実行される。言語を自動検出し、適切なリンターを実行:
 
-```json
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "Edit|Write",
-      "hooks": [{"type": "command", "command": "npm run lint --silent 2>&1 | head -30 || true"}]
-    }]
-  }
-}
-```
+- `.ts/.tsx/.js/.jsx` → `npm run lint`
+- `.py` → `ruff check` + `ruff format`
+- `.go` → `golangci-lint run`
 
-### L2: プリコミットフックの設定例（Lefthook）
+フィードバックは `hookSpecificOutput.additionalContext` を含むJSON形式でエージェントのコンテキストに直接注入される。
+
+設定: `.claude/settings.json` の `hooks.PostToolUse` → `.claude/hooks/post-lint.sh`
+
+### L2: プリコミットフックの設定（Lefthook）
+
+プロジェクトルートの `lefthook.yml` でコミット前にlint/typecheckを自動実行:
 
 ```yaml
 # lefthook.yml
 pre-commit:
   commands:
     lint:
+      glob: "*.{ts,tsx,js,jsx}"
       run: npm run lint
+      skip:
+        - run: "[ ! -f package.json ]"
     typecheck:
+      glob: "*.{ts,tsx}"
       run: npm run typecheck
+      skip:
+        - run: "[ ! -f package.json ]"
+    ruff-check:
+      glob: "*.py"
+      run: ruff check {staged_files}
+      skip:
+        - run: "! command -v ruff >/dev/null 2>&1"
+    ruff-format:
+      glob: "*.py"
+      run: ruff format --check {staged_files}
+      skip:
+        - run: "! command -v ruff >/dev/null 2>&1"
 ```
 
 インストール:

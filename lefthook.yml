@@ -1,0 +1,26 @@
+# Lefthook プリコミットフック設定
+# インストール: npm install --save-dev lefthook && npx lefthook install
+# ドキュメント: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: npm run lint
+      skip:
+        - run: "[ ! -f package.json ]"
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: npm run typecheck
+      skip:
+        - run: "[ ! -f package.json ]"
+    ruff-check:
+      glob: "*.py"
+      run: ruff check {staged_files}
+      skip:
+        - run: "! command -v ruff >/dev/null 2>&1"
+    ruff-format:
+      glob: "*.py"
+      run: ruff format --check {staged_files}
+      skip:
+        - run: "! command -v ruff >/dev/null 2>&1"

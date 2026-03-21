@@ -61,6 +61,24 @@ ls docs/ideas/
 2. 既存のドキュメントを読む
 3. スキルのテンプレートとガイドに従って`docs/architecture.md`を作成
 
+### ステップ3.5: ADRの自動生成
+
+1. `docs/architecture.md` を読み、主要なアーキテクチャ意思決定を抽出する。
+   - 技術スタック選定（フロントエンド、バックエンド、データベース等）
+   - 設計パターン選択（状態管理方式、CSS/スタイリング方式等）
+   - インフラ・デプロイ方針
+2. 各決定について `docs/adr/_template.md` の形式でADRを生成する:
+   - `docs/adr/` 内の既存ADRファイル（`_template.md`、`README.md`を除く）を確認し、最大番号の次の番号を採番する（初回は`0001`から開始）
+   - ファイル名: `NNNN-[決定の英語要約].md`（例: `0001-react-nextjs-frontend.md`）
+   - ステータス: `Accepted`
+   - 日付: 現在の日付
+   - 決定者: `AI Agent (setup-project)`
+   - コンテキスト: architecture.md から該当箇所を要約
+   - 検討した選択肢: architecture.md に記載があれば抽出、なければ代表的な選択肢を補完
+   - 決定内容: 選択した技術・パターンとその理由
+   - 結果・トレードオフ: 採用による利点と受け入れたトレードオフ
+3. 生成されるADRは architecture.md に記載された決定事項の数に応じて動的に決まる。
+
 ### ステップ4: リポジトリ構造定義書の作成
 
 1. **repository-structureスキル**をロード
@@ -94,6 +112,7 @@ ls docs/ideas/
 
 - 6つの永続ドキュメントが全て作成されていること
 - README.md の雛形が生成されていること
+- `docs/adr/` にアーキテクチャ意思決定のADRが生成されていること
 
 完了時のメッセージ:
 ```
@@ -106,6 +125,7 @@ ls docs/ideas/
 ✅ docs/repository-structure.md
 ✅ docs/development-guidelines.md
 ✅ docs/glossary.md
+✅ docs/adr/NNNN-*.md（ADR）
 ✅ README.md（雛形）
 
 これで開発を開始する準備が整いました。
