@@ -8,7 +8,8 @@
       "Skill(development-guidelines)",
       "Skill(glossary-creation)",
       "Edit(/.claude/skills/architecture-design/**)",
-      "Edit(/.claude/skills/steering/**)"
+      "Edit(/.claude/skills/steering/**)",
+      "Edit(/.claude/skills/testing/**)"
     ],
     "deny": [],
     "ask": []
@@ -41,6 +42,15 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/post-lint.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__playwright__browser_take_screenshot",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-screenshot-cleanup.sh"
           }
         ]
       }

@@ -36,6 +36,12 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Playwright screenshots (auto-moved to artifacts/screenshots/ by hook)
+/*.png
+/*.jpeg
+/*.jpg
+artifacts/
+
 # Lock files (keep package-lock.json for consistency)
 # yarn.lock
 

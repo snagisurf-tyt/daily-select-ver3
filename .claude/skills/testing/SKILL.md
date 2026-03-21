@@ -31,6 +31,9 @@ Playwright を使う場合は、以下の優先順位で実行すること。
   - 例: 不正な入力をしたときにエラーメッセージが表示されるか
   - 例: APIがエラーを返したときにUIが壊れないか
 - [ ] ブラウザの **コンソールにエラーが出ていない**か
+- [ ] スクリーンショットは `artifacts/screenshots/` に保存されていること（ルート直下に png が残っていないか確認）
+
+> **スクリーンショットの保存先ルール**: Playwright でスクリーンショットを撮る際は `--filename=artifacts/screenshots/{名前}.png` を指定すること。指定し忘れても PostToolUse Hook がルート直下の png を `artifacts/screenshots/` に自動移動する。
 
 ---
 

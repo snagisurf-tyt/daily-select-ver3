@@ -24,6 +24,12 @@
 - 技術スタック選定: `.claude/docs/guidelines/tech-stack-guidelines.md` を参照
 - ディレクトリ構造: `.claude/docs/guidelines/repository-structure-guidelines.md` を参照
 
+## スクリーンショット
+
+- Playwright でスクリーンショットを撮る際は `artifacts/screenshots/` に保存すること
+- ルート直下に png を保存しないこと（PostToolUse Hook が自動移動するが、最初から正しい場所に保存するのが望ましい）
+- README 用スクリーンショットは `docs/screenshots/` に保存すること（移動対象外）
+
 ## 開発ガイドライン
 
 - コーディング規約・AI生成コードのアンチパターン・ドキュメント管理戦略: `.claude/docs/guidelines/development-guidelines.md`
