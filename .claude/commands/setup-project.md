@@ -79,9 +79,21 @@ ls docs/ideas/
 2. 既存のドキュメントを読む
 3. スキルのテンプレートに従って`docs/glossary.md`を作成
 
+### ステップ7: README.md の雛形生成
+
+1. ステップ1〜6で作成した永続ドキュメントを元に、アプリ用の README.md の雛形を生成する。
+2. `/generate-readme` コマンドと同等の処理を実行する:
+   - `docs/product-requirements.md` から概要を抽出
+   - `docs/architecture.md` から技術スタックを抽出
+   - `docs/functional-design.md` から主要機能を抽出
+   - shields.io バッジを生成
+   - スクリーンショットセクションはプレースホルダとする（この時点ではアプリ未実装のため）
+3. README.md をプロジェクトルートに保存する。
+
 ## 完了条件
 
 - 6つの永続ドキュメントが全て作成されていること
+- README.md の雛形が生成されていること
 
 完了時のメッセージ:
 ```
@@ -94,6 +106,7 @@ ls docs/ideas/
 ✅ docs/repository-structure.md
 ✅ docs/development-guidelines.md
 ✅ docs/glossary.md
+✅ README.md（雛形）
 
 これで開発を開始する準備が整いました。
 
@@ -103,6 +116,9 @@ ls docs/ideas/
 
 - 機能の追加: /add-feature [機能名] を実行してください
   例: /add-feature ユーザー認証
+
+- README更新: /generate-readme を実行してください
+  スクリーンショット撮影やバッジ更新が自動で行われます
 
 - ドキュメントレビュー: /review-docs [パス] を実行してください
   例: /review-docs docs/product-requirements.md

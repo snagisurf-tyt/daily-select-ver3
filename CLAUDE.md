@@ -16,15 +16,16 @@
 - 1は`/setup-project`コマンド、2は`/plan-kaizen`コマンド、3-6は`/add-feature`コマンドで着火する想定。
 - `/add-feature`コマンドの代わりに `/add-feature-ui`コマンドを使うとE2Eテストまでおこなう。
 - `/resume-work`コマンドは、途中で中断した作業の再開に使用する。
+- `/generate-readme`コマンドは、アプリ用README.mdの自動生成・更新に使用する。
 - スキルを直接呼び出して開発ワークフローを迂回することは禁止。詳細は `.claude/rules/workflow-guardrails.md` を参照。
 
 ## ガイドライン
 
-- 技術スタック選定: `docs/guidelines/tech-stack-guidelines.md` を参照
-- ディレクトリ構造: `docs/guidelines/repository-structure-guidelines.md` を参照
+- 技術スタック選定: `.claude/docs/guidelines/tech-stack-guidelines.md` を参照
+- ディレクトリ構造: `.claude/docs/guidelines/repository-structure-guidelines.md` を参照
 
 ## 開発ガイドライン
 
-- コーディング規約・AI生成コードのアンチパターン・ドキュメント管理戦略: `docs/guidelines/development-guidelines.md`
+- コーディング規約・AI生成コードのアンチパターン・ドキュメント管理戦略: `.claude/docs/guidelines/development-guidelines.md`
 - アーキテクチャ意思決定の記録: `docs/adr/`
-- フィードバック速度の階層とDoD: `docs/guidelines/definition-of-done.md`
+- フィードバック速度の階層とDoD: `.claude/docs/guidelines/definition-of-done.md`

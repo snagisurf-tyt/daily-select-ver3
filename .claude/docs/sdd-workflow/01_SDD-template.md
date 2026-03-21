@@ -29,7 +29,7 @@
 ## 事前準備
 
 1. このリポジトリをテンプレートとしてプロジェクトフォルダを作る。
-   * プロジェクトフォルダに `.claude`フォルダ、`docs/guidelines`フォルダ、`CLAUDE.md`をコピーしても良いです。
+   * プロジェクトフォルダに `.claude`フォルダと`CLAUDE.md`をコピーしても良いです。
 
 2. アプリテストに使う Playwright CLI と Playwright MCP をインストールする。
    * インストール方法は[Playwright CLI / MCP セットアップガイド](#playwright-cli--mcp-セットアップガイド) を参照してください。
@@ -45,7 +45,7 @@
 * プロジェクトフォルダで Claude Code を起動する。
 * `/plan-kaizen` コマンドを使って、Claude Codeとの対話を通じて内容をブラッシュアップする。
   * プロダクトの基本的なアイデア、解決したい課題、ターゲットユーザーの概要、実装したい主要機能、MVPの範囲 などを整理する。
-  * このコマンドは`docs/guidelines`フォルダにあるガイドラインを参照します。アプリにつかう技術スタックを指定したい場合は、`tech-stack-guidelines.md`を編集してください。
+  * このコマンドは`.claude/docs/guidelines`フォルダにあるガイドラインを参照します。アプリにつかう技術スタックを指定したい場合は、`tech-stack-guidelines.md`を編集してください。
 
 ### 2. アプリの仕様書を作る
 
@@ -116,9 +116,9 @@ tests/              # テストコード（下記参照）
 ## 参考ドキュメント
 
 - [SDD-workflow.md](SDD-workflow.md) — 全体ワークフロー図
-- [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) — 品質ゲートの定義
-- [docs/guidelines/repository-structure-guidelines.md](docs/guidelines/repository-structure-guidelines.md) — ディレクトリ構造
-- [docs/guidelines/tech-stack-guidelines.md](docs/guidelines/tech-stack-guidelines.md) — 技術スタック選定ガイドライン
+- [.claude/docs/guidelines/definition-of-done.md](.claude/docs/guidelines/definition-of-done.md) — 品質ゲートの定義
+- [.claude/docs/guidelines/repository-structure-guidelines.md](.claude/docs/guidelines/repository-structure-guidelines.md) — ディレクトリ構造
+- [.claude/docs/guidelines/tech-stack-guidelines.md](.claude/docs/guidelines/tech-stack-guidelines.md) — 技術スタック選定ガイドライン
 
 
 --------------

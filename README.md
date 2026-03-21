@@ -30,7 +30,7 @@
 ## 事前準備
 
 1. このリポジトリをテンプレートとしてプロジェクトフォルダを作る。
-   * プロジェクトフォルダに `.claude`フォルダ、`docs/guidelines`フォルダ、`CLAUDE.md`をコピーしても良いです。
+   * プロジェクトフォルダに `.claude`フォルダと`CLAUDE.md`をコピーしても良いです。
 
 2. アプリテストに使う Playwright CLI と Playwright MCP をインストールする。
    * インストール方法は[Playwright CLI / MCP セットアップガイド](#playwright-cli--mcp-セットアップガイド) を参照してください。
@@ -46,7 +46,7 @@
 * プロジェクトフォルダで Claude Code を起動する。
 * `/plan-kaizen` コマンドを使って、Claude Codeとの対話を通じて内容をブラッシュアップする。
   * プロダクトの基本的なアイデア、解決したい課題、ターゲットユーザーの概要、実装したい主要機能、MVPの範囲 などを整理する。
-  * このコマンドは`docs/guidelines`フォルダにあるガイドラインを参照します。アプリにつかう技術スタックを指定したい場合は、`tech-stack-guidelines.md`を編集してください。
+  * このコマンドは`.claude/docs/guidelines`フォルダにあるガイドラインを参照します。アプリにつかう技術スタックを指定したい場合は、`tech-stack-guidelines.md`を編集してください。
 
 ### 2. アプリの仕様書を作る
 
@@ -89,7 +89,7 @@
 |------|---------|---------|
 | PostToolUse | `Edit` / `Write` ツール実行後 | `npm run lint`（`package.json` 存在時のみ） |
 
-プロジェクトのテックスタックに応じて `.claude/settings.json` の `hooks` セクションをカスタマイズしてください。詳細は [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) の「フィードバック速度の階層」を参照。
+プロジェクトのテックスタックに応じて `.claude/settings.json` の `hooks` セクションをカスタマイズしてください。詳細は [.claude/docs/guidelines/definition-of-done.md](.claude/docs/guidelines/definition-of-done.md) の「フィードバック速度の階層」を参照。
 
 ## ディレクトリ構成
 
@@ -100,9 +100,11 @@
 .claude/agents/     # サブエージェント定義
 .claude/skills/     # スキル定義
 .claude/rules/      # 常時有効なガードレール（全会話に自動注入）
+.claude/docs/       # テンプレート関連ドキュメント
+  guidelines/       # 開発ガイドライン・品質定義・技術スタック選定
+  sdd-workflow/     # SDDワークフロー背景ドキュメント
 docs/               # プロジェクト永続ドキュメント（/setup-project で生成）
 docs/adr/           # アーキテクチャ意思決定記録（ADR）
-docs/guidelines/    # 開発ガイドライン・品質定義・技術スタック選定
 .steering/          # 作業単位のタスク管理（/add-feature で生成）
 src/                # ソースコード（/add-feature で生成）
 tests/              # テストコード（下記参照）
@@ -129,12 +131,12 @@ tests/              # テストコード（下記参照）
 ## 参考ドキュメント
 
 - [SDD-workflow.md](SDD-workflow.md) — 全体ワークフロー図
-- [docs/guidelines/definition-of-done.md](docs/guidelines/definition-of-done.md) — 品質ゲートの定義・フィードバック速度の階層
-- [docs/guidelines/development-guidelines.md](docs/guidelines/development-guidelines.md) — 開発ガイドライン・AIアンチパターン・ドキュメント管理戦略
-- [docs/guidelines/repository-structure-guidelines.md](docs/guidelines/repository-structure-guidelines.md) — ディレクトリ構造
-- [docs/guidelines/tech-stack-guidelines.md](docs/guidelines/tech-stack-guidelines.md) — 技術スタック選定ガイドライン
+- [.claude/docs/guidelines/definition-of-done.md](.claude/docs/guidelines/definition-of-done.md) — 品質ゲートの定義・フィードバック速度の階層
+- [.claude/docs/guidelines/development-guidelines.md](.claude/docs/guidelines/development-guidelines.md) — 開発ガイドライン・AIアンチパターン・ドキュメント管理戦略
+- [.claude/docs/guidelines/repository-structure-guidelines.md](.claude/docs/guidelines/repository-structure-guidelines.md) — ディレクトリ構造
+- [.claude/docs/guidelines/tech-stack-guidelines.md](.claude/docs/guidelines/tech-stack-guidelines.md) — 技術スタック選定ガイドライン
 - [docs/adr/README.md](docs/adr/README.md) — ADR（アーキテクチャ意思決定記録）の運用ルール
-- [docs/sdd-workflow/04_Harness-engineering-improvements.md](docs/sdd-workflow/04_Harness-engineering-improvements.md) — Harness Engineering ベストプラクティスに基づく改善記録
+- [.claude/docs/sdd-workflow/04_Harness-engineering-improvements.md](.claude/docs/sdd-workflow/04_Harness-engineering-improvements.md) — Harness Engineering ベストプラクティスに基づく改善記録
 
 
 --------------

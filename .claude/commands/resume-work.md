@@ -102,7 +102,7 @@ tasklist.md を分析し、以下を特定する:
 
 `/add-feature` の **ステップ7** と全く同じ手順で品質ゲートを実行する:
 
-1. `docs/guidelines/definition-of-done.md` を読み、適用するゲートと合格条件を確認する。
+1. `.claude/docs/guidelines/definition-of-done.md` を読み、適用するゲートと合格条件を確認する。
 2. 反復カウンターを 0 に初期化する（最大 3 回）。
 3. ゲートの実行要否を確認する（`playwright.config.ts`, `tests/vrt/__screenshots__/`, `tests/a11y/`, `.claude/agents/ui-ux-validator.md` の存在確認）。
 4. Gate 1〜5 を設定済みの場合のみ実行する。
@@ -120,7 +120,7 @@ tasklist.md を分析し、以下を特定する:
 
 `/add-feature` と同じ完了条件を全て満たすこと:
 - `tasklist.md` の全タスクが完了状態
-- `docs/guidelines/definition-of-done.md` の全適用ゲートがパスしている
+- `.claude/docs/guidelines/definition-of-done.md` の全適用ゲートがパスしている
 - `tasklist.md` に申し送り事項が記載されている
 
 ## 注意事項

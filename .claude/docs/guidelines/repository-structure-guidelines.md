@@ -9,18 +9,19 @@
 │   ├── skills/
 │   ├── commands/              # コマンド定義ファイル
 │   ├── agents/              # エージェント定義ファイル
-│   └── rules/              # ルール定義ファイル
-├── docs/                      # 永続的ドキュメント
+│   ├── rules/              # ルール定義ファイル
+│   └── docs/              # テンプレート関連ドキュメント
+│       ├── guidelines/        # 開発ガイドライン・品質定義・技術スタック選定
+│       └── sdd-workflow/      # SDDワークフロー背景ドキュメント
+├── docs/                      # 永続的ドキュメント（アプリ開発成果物）
 │   ├── ideas/                  # アイデアや下書き
+│   ├── screenshots/            # アプリスクリーンショット（README用）
 │   ├── product-requirements.md  # プロダクト要求定義書
 │   ├── functional-design.md     # 機能設計書
 │   ├── architecture.md         # 技術仕様書
 │   ├── repository-structure.md  # リポジトリ構造定義書
 │   ├── development-guidelines.md # 開発ガイドライン
-│   ├── glossary.md             # ユビキタス言語定義
-│   └── guidelines/                 # ガイドライン集    
-│       ├── repository-structure-guidelines.md # リポジトリ構造ガイドライン
-│       └── tech-stack-guidelines.md # 技術スタックガイドライン
+│   └── glossary.md             # ユビキタス言語定義
 ├── .steering/                  # 作業単位のドキュメント
 │   └── [YYYYMMDD]-[タスク名]/  # タスクごとにフォルダ
 │       ├── requirements.md      # タスクの要求内容

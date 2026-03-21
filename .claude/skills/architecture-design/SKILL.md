@@ -17,7 +17,7 @@ caller: /setup-project
 
 1. `docs/product-requirements.md` (PRD)
 2. `docs/functional-design.md` (機能設計書)
-3. `docs/guidelines/tech-stack-guidelines.md` (技術スタックガイドライン)
+3. `.claude/docs/guidelines/tech-stack-guidelines.md` (技術スタックガイドライン)
 
 アーキテクチャ設計は、PRDの要件と機能設計を技術的に実現するための
 システム構造とテクノロジースタックを定義します。
@@ -30,7 +30,7 @@ caller: /setup-project
    - プロジェクト固有の技術選定と設計が確定済み
    - 既存設計書がある場合はその内容を維持・継承する
 
-2. **技術スタックガイドライン (`docs/guidelines/tech-stack-guidelines.md`)** - 次点
+2. **技術スタックガイドライン (`.claude/docs/guidelines/tech-stack-guidelines.md`)** - 次点
    - 複数の構成オプション（例: 開発構成・本番構成）が定義されている場合がある
    - **複数の選択肢がある場合は、以下のいずれかを行うこと:**
      - PRD・機能設計書のコンテキストから判断できる場合 → 最適な構成を選択して明記する

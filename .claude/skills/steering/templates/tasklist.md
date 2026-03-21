@@ -81,7 +81,7 @@
 
 ## フェーズ3: 品質ゲート（DoD 準拠）
 
-> **チェックポイント CP-FINAL**: `docs/guidelines/definition-of-done.md` の全ゲートをパスするまでクローズしない。
+> **チェックポイント CP-FINAL**: `.claude/docs/guidelines/definition-of-done.md` の全ゲートをパスするまでクローズしない。
 > 最大反復回数: 3回。3回失敗した場合は `.steering/[タスク名]/failure-report.md` を生成してエスカレーション。
 
 ### Gate 1: 静的解析（必須）
