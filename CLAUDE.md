@@ -3,6 +3,11 @@
 * 日本語で対話すること。
 * `AskUserQuestion`ツールを使って、ユーザーに選択肢を示しながら対話すること。
 
+## plan モードと plan-kaizen の使い分け
+
+- **plan モード**（EnterPlanMode）: 実装方法の計画（How）に使う。plan ファイル自体は `.claude/plans/` に保存される（Claude Code 内部動作）が、plan 承認後に生成する仕様書・設計メモは `docs/ideas/` に保存すること。
+- **`/plan-kaizen`**: 仕様の壁打ち・策定（What）に使う。成果物は `docs/ideas/` に保存する。plan モードとは併用しない。
+
 ## 基本的な開発ワークフロー
 
 1. **ドキュメント作成**: 永続ドキュメント(`docs/`)で「何を作るか」を定義
