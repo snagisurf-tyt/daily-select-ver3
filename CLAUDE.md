@@ -20,6 +20,8 @@
 
 - 1は`/setup-project`コマンド、2は`/plan-kaizen`コマンド、3-6は`/add-feature`コマンドで着火する想定。
 - `/add-feature`コマンドの代わりに `/add-feature-ui`コマンドを使うとE2Eテストまでおこなう。
+- `/auto-add-feature-with-plan`コマンドは、仕様策定（plan-kaizen）から実装・コミット・pushまでを一括自動実行する（ユーザー確認なし）。
+- `/auto-add-feature-ui-with-plan`コマンドは、`/auto-add-feature-with-plan`のE2Eテストあり版。
 - `/resume-work`コマンドは、途中で中断した作業の再開に使用する。
 - `/generate-readme`コマンドは、アプリ用README.mdの自動生成・更新に使用する。
 - スキルを直接呼び出して開発ワークフローを迂回することは禁止。詳細は `.claude/rules/workflow-guardrails.md` を参照。
