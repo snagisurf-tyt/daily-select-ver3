@@ -150,7 +150,8 @@ sequenceDiagram
   - GitHub Issue を参照: `/auto-add-feature-with-plan #42`
   - E2E テスト付き: `/auto-add-feature-ui-with-plan "機能の説明"`
 
-> ⚠️ **auto系コマンドの注意点**: 小規模・低リスクな変更に限定して使用してください。以下のような変更では、通常の `/add-feature` を使い、各ステップを確認しながら進めることを推奨します:
+> ⚠️ **auto系コマンドの注意点**: 小規模・低リスクな変更に限定して使用してください。
+> 以下のような変更では、通常の `/add-feature` を使い、各ステップを確認しながら進めることを推奨します:
 > - DB スキーマ変更・マイグレーション
 > - 認証・認可ロジックの変更
 > - 外部 API 連携の追加・変更
@@ -209,10 +210,10 @@ sequenceDiagram
 
 | サブエージェント | 概要 | 呼び出し元 |
 |----------------|------|-----------|
-| `implementation-validator` | 実装コードの品質検証・スペックとの整合性確認 | `/add-feature`, `/add-feature-ui` |
-| `ui-ux-validator` | UI/UX 品質の検証（機械的テストで担保できない観点） | `/add-feature-ui` |
-| `screenshot-capture` | アプリのスクリーンショット自動撮影（`docs/screenshots/` に保存） | `/generate-readme` |
-| `doc-reviewer` | ドキュメントの品質レビューと改善提案 | `/review-docs` |
+| `implementation-validator` | 実装差分と仕様書の適合性・コード品質・テストカバレッジ・セキュリティを検証 | `/add-feature`, `/add-feature-ui` |
+| `ui-ux-validator` | 画面表示・操作フロー・デザイン一貫性など機械的テストで検出できない UI/UX 問題をレビュー | `/add-feature-ui` |
+| `screenshot-capture` | Playwright CLI でアプリ画面を自動撮影し `docs/screenshots/` に保存（README 向け） | `/generate-readme` |
+| `doc-reviewer` | README・設計書・tasklist・仕様書の整合性・完結性・誤記をレビューし改善提案 | `/review-docs` |
 
 ## ルール一覧
 
@@ -338,4 +339,4 @@ sequenceDiagram
 playwright mcp で https://example.com にアクセスして、検索ボックスに「テスト」と入力して検索結果のスクリーンショットを撮って
 ```
 
-<!-- readme-generated: 2026-04-03T00:00:00 -->
+<!-- readme-generated: 2026-05-26T00:00:00 -->
