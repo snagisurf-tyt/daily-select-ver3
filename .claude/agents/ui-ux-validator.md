@@ -1,6 +1,6 @@
 ---
 name: ui-ux-validator
-description: UI/UX品質を検証し、機械的テストでは担保できない観点をレビューするサブエージェント
+description: 画面表示・操作フロー・デザイン一貫性など機械的テストで検出できないUI/UX問題をレビューするサブエージェント。Gate5として /add-feature-ui から呼ばれる。
 model: sonnet
 ---
 

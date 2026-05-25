@@ -1,6 +1,6 @@
 ---
 name: doc-reviewer
-description: ドキュメントの品質をレビューし、改善提案を行うサブエージェント
+description: README・設計書・tasklist・仕様書の整合性・完結性・誤記をレビューし改善提案するサブエージェント。/review-docs から呼ばれる。
 model: sonnet
 ---
 

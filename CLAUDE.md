@@ -20,11 +20,32 @@
 
 - 1は`/setup-project`コマンド、2は`/plan-kaizen`コマンド、3-6は`/add-feature`コマンドで着火する想定。
 - `/add-feature`コマンドの代わりに `/add-feature-ui`コマンドを使うとE2Eテストまでおこなう。
-- `/auto-add-feature-with-plan`コマンドは、仕様策定（plan-kaizen）から実装・コミット・pushまでを一括自動実行する（ユーザー確認なし）。
+- `/auto-add-feature-with-plan`コマンドは、仕様策定（plan-kaizen）から実装・コミット・pushまでを一括自動実行する（ユーザー確認なし）。**小規模・低リスク変更に限定すること。**
 - `/auto-add-feature-ui-with-plan`コマンドは、`/auto-add-feature-with-plan`のE2Eテストあり版。
 - `/resume-work`コマンドは、途中で中断した作業の再開に使用する。
 - `/generate-readme`コマンドは、アプリ用README.mdの自動生成・更新に使用する。
 - スキルを直接呼び出して開発ワークフローを迂回することは禁止。詳細は `.claude/rules/workflow-guardrails.md` を参照。
+
+### ドキュメント・ファイルの役割
+
+| 場所 | 役割 | 作成タイミング |
+|---|---|---|
+| `docs/` | プロダクト全体の長期ドキュメント（PRD・設計書など） | `/setup-project` 実行時 |
+| `docs/ideas/` | アイデアメモ・壁打ち結果・仕様書（実装前の素材） | `/plan-kaizen` 実行時 |
+| `.steering/YYYYMMDD-name/` | 変更単位の実行仕様（requirements.md / design.md / tasklist.md） | `/add-feature` 実行時 |
+
+- `.steering/` は「変更単位spec管理領域」として位置づける。軽微な修正では作成せずタスクで管理してよい。
+- 1変更 = 1ディレクトリ。完了後も履歴として残す。
+
+## ビルトインコマンドの活用
+
+Claude Code のビルトインコマンドを以下のタイミングで活用すること。
+
+- **`/run-skill-generator`**: 新規プロジェクト作成後、または起動方法・依存関係・環境変数が変わったときに実行する。プロジェクト固有の起動手順・テストコマンド・確認URLを `.claude/skills/run-<project>/` に生成する。secrets や `.env` の実値は記録しない。
+- **`/run`**: アプリを起動し、基本的な動作を確認する。
+- **`/verify`**: 実装完了後に変更が本当に動くか確認する。**単体テスト合格だけで完了扱いにしない。必ず `/verify` または同等の動作確認を実施すること。**
+
+> `/verify` は `/add-feature` のステップ7.5（動作確認・リグレッションチェック）に相当する。`testing` skill は `/add-feature` から自動呼び出しされる詳細基準・補助手順であり、`/verify` の内部実装を支援する。
 
 ## ガイドライン
 

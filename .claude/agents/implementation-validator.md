@@ -1,6 +1,6 @@
 ---
 name: implementation-validator
-description: 実装コードの品質を検証し、スペックとの整合性を確認するサブエージェント
+description: 実装差分と仕様書（requirements.md / design.md）の適合性・コード品質・テストカバレッジ・セキュリティを検証するサブエージェント。/add-feature の品質ゲート前に呼ばれる。
 model: sonnet
 ---
 

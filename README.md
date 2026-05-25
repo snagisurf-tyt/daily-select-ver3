@@ -150,6 +150,14 @@ sequenceDiagram
   - GitHub Issue を参照: `/auto-add-feature-with-plan #42`
   - E2E テスト付き: `/auto-add-feature-ui-with-plan "機能の説明"`
 
+> ⚠️ **auto系コマンドの注意点**: 小規模・低リスクな変更に限定して使用してください。以下のような変更では、通常の `/add-feature` を使い、各ステップを確認しながら進めることを推奨します:
+> - DB スキーマ変更・マイグレーション
+> - 認証・認可ロジックの変更
+> - 外部 API 連携の追加・変更
+> - ファイル・ディレクトリの削除
+> - 大量ファイル変更（10 ファイル以上が目安）
+> - 破壊的な後方互換性破壊
+
 #### ⑤ リポジトリ更新: README と Git を最新化する
 
 実装が一段落したら README と Git を更新します。
@@ -165,11 +173,19 @@ sequenceDiagram
 | `/setup-project` | 6種の設計ドキュメント生成 | プロジェクト初回のみ |
 | `/add-feature` | 機能の実装（計画→実装→検証） | コードを書くとき |
 | `/add-feature-ui` | 機能の実装（E2Eテスト付き） | UI を含む機能を作るとき |
-| `/auto-add-feature-with-plan` | 仕様策定→実装→コミット・pushを一括自動実行 | 確認なしで一気に進めたいとき |
-| `/auto-add-feature-ui-with-plan` | 仕様策定→実装（E2E付き）→コミット・pushを一括自動実行 | 確認なしで一気に進めたいとき（E2Eあり） |
+| `/auto-add-feature-with-plan` | 仕様策定→実装→コミット・pushを一括自動実行 | 小規模・低リスク変更を確認なしで進めたいとき |
+| `/auto-add-feature-ui-with-plan` | 仕様策定→実装（E2E付き）→コミット・pushを一括自動実行 | 同上（E2Eあり） |
 | `/resume-work` | 中断した作業の再開 | 途中で止まった作業を続けるとき |
 | `/review-docs` | ドキュメントのレビュー | ドキュメントの品質を確認したいとき |
 | `/generate-readme` | README.md の自動生成 | README を更新したいとき |
+
+### Claude Code ビルトインコマンド（活用推奨）
+
+| コマンド | 用途 | いつ使う？ |
+|---------|------|-----------|
+| `/run-skill-generator` | プロジェクト固有の起動・検証スキルを生成 | 新規プロジェクト作成後、または起動方法・環境が変わったとき |
+| `/run` | アプリ起動と基本動作確認 | 動作を手軽に確認したいとき |
+| `/verify` | 実装後の動作確認（**実装完了の必須条件**） | コード変更後・必ず実施すること |
 
 ## スキル一覧
 
@@ -220,12 +236,24 @@ sequenceDiagram
 ├── CLAUDE.md                 # プロジェクトメモリ（Claude Code が常に参照）
 │
 ├── docs/                     # 設計ドキュメント（/setup-project で生成）
-│   ├── ideas/                #   アイデアメモ・仕様書
+│   ├── ideas/                #   アイデアメモ・壁打ち結果・仕様書
 │   └── adr/                  #   アーキテクチャ意思決定記録
-├── .steering/                # 作業管理（/add-feature で生成）
+├── .steering/                # 変更単位の実行仕様（/add-feature で生成）
 ├── src/                      # ソースコード（/add-feature で生成）
 └── tests/                    # テストコード（/add-feature-ui で生成）
 ```
+
+### docs/ / docs/ideas/ / .steering/ の使い分け
+
+| ディレクトリ | 役割 | 作成タイミング |
+|---|---|---|
+| `docs/` | プロダクト全体の長期ドキュメント（PRD・設計書など） | `/setup-project` 実行時 |
+| `docs/ideas/` | アイデアメモ・壁打ち結果・仕様書（実装前の素材） | `/plan-kaizen` 実行時 |
+| `.steering/YYYYMMDD-name/` | 変更単位の実行仕様（requirements / design / tasklist） | `/add-feature` 実行時 |
+
+- `docs/` はプロダクトの全体像を定義する **長期ドキュメント**
+- `docs/ideas/` は実装前に固める **仕様素材**（実装後も残す）
+- `.steering/` は1変更ごとに作る **作業ログ**（完了後も履歴として残す）
 
 ## カスタマイズ
 
@@ -265,6 +293,7 @@ sequenceDiagram
 
 | 日付 | 変更内容 |
 |------|---------|
+| 2026-05-26 | ビルトインコマンド（/run-skill-generator, /run, /verify）運用方針を統合・auto系安全チェック強化・開発ガイドライン拡充 |
 | 2026-04-03 | auto-add-feature-with-plan / auto-add-feature-ui-with-plan コマンドを追加 |
 | 2026-04-03 | README にサブエージェント一覧・ルール一覧・Mermaid ワークフロー図を追加 |
 | 2026-03-27 | generate-readme コマンドに変更履歴セクション自動生成機能を追加 |

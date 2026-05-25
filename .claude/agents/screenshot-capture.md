@@ -1,6 +1,6 @@
 ---
 name: screenshot-capture
-description: アプリのスクリーンショットを自動撮影し、docs/screenshots/ に保存するサブエージェント
+description: アプリの画面をPlaywright CLIで自動撮影しdocs/screenshots/に保存するサブエージェント。README向けスクリーンショット収集を担当。/generate-readme から呼ばれる。
 model: sonnet
 ---
 
@@ -14,7 +14,7 @@ model: sonnet
 
 ## 前提条件
 
-- Playwright MCP が利用可能であること
+- Playwright CLI（第一優先）または Playwright MCP が利用可能であること
 - アプリケーションのソースコードが `src/` に存在すること
 
 ## 撮影プロセス
