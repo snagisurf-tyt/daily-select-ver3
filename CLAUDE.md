@@ -23,6 +23,7 @@
 - `/auto-add-feature-with-plan`コマンドは、仕様策定（plan-kaizen）から実装・コミット・pushまでを一括自動実行する（ユーザー確認なし）。**小規模・低リスク変更に限定すること。**
 - `/auto-add-feature-ui-with-plan`コマンドは、`/auto-add-feature-with-plan`のE2Eテストあり版。
 - `/resume-work`コマンドは、途中で中断した作業の再開に使用する。
+- `/fix-bug`コマンドは、バグ修正に使用する（再現→最小化→仮説→修正→回帰確認の順で進める）。
 - `/generate-readme`コマンドは、アプリ用README.mdの自動生成・更新に使用する。
 - スキルを直接呼び出して開発ワークフローを迂回することは禁止。詳細は `.claude/rules/workflow-guardrails.md` を参照。
 
@@ -31,11 +32,13 @@
 | 場所 | 役割 | 作成タイミング |
 |---|---|---|
 | `docs/` | プロダクト全体の長期ドキュメント（PRD・設計書など） | `/setup-project` 実行時 |
+| `docs/glossary.md` | プロジェクト共有言語（ドメイン用語・命名規則・禁止語） | `/setup-project` 実行時に生成 |
 | `docs/ideas/` | アイデアメモ・壁打ち結果・仕様書（実装前の素材） | `/plan-kaizen` 実行時 |
 | `.steering/YYYYMMDD-name/` | 変更単位の実行仕様（requirements.md / design.md / tasklist.md） | `/add-feature` 実行時 |
 
 - `.steering/` は「変更単位spec管理領域」として位置づける。軽微な修正では作成せずタスクで管理してよい。
 - 1変更 = 1ディレクトリ。完了後も履歴として残す。
+- プロジェクト内で用語を統一するときは `docs/glossary.md` を共有言語として使うこと（存在する場合）。
 
 ## ビルトインコマンドの活用
 
