@@ -146,9 +146,11 @@ sequenceDiagram
 
 - 簡単な変更: `/add-feature ユーザープロフィール編集を追加して`
 - 複雑な変更: まず `/plan-kaizen` で仕様を固めてから `/add-feature` で実装
+- **バグ修正**: `/fix-bug ログイン後にリダイレクトされない` — 再現手順が確立できない場合は停止してユーザーに報告します
 - **確認なしで一気に進めたい場合**: `/auto-add-feature-with-plan "機能の説明"` を使うと、仕様策定（plan-kaizen）→ 実装（add-feature）→ コミット・push まで自動完走します
   - GitHub Issue を参照: `/auto-add-feature-with-plan #42`
   - E2E テスト付き: `/auto-add-feature-ui-with-plan "機能の説明"`
+- **中断した作業の再開**: `/resume-work` — `tasklist.md` の Handoff セクション（中断時に記録）から状態を復元します
 
 > ⚠️ **auto系コマンドの注意点**: 小規模・低リスクな変更に限定して使用してください。
 > 以下のような変更では、通常の `/add-feature` を使い、各ステップを確認しながら進めることを推奨します:
@@ -170,13 +172,14 @@ sequenceDiagram
 
 | コマンド | 用途 | いつ使う？ |
 |---------|------|-----------|
-| `/plan-kaizen` | アイデアの壁打ち・仕様整理 | 新機能を考えるとき |
+| `/plan-kaizen` | アイデアの壁打ち・仕様整理（10の観点で深掘り） | 新機能を考えるとき |
 | `/setup-project` | 6種の設計ドキュメント生成 | プロジェクト初回のみ |
 | `/add-feature` | 機能の実装（計画→実装→検証） | コードを書くとき |
-| `/add-feature-ui` | 機能の実装（E2Eテスト付き） | UI を含む機能を作るとき |
+| `/add-feature-ui` | 機能の実装（E2Eテスト付き・高リスク変更は停止確認） | UI を含む機能を作るとき |
 | `/auto-add-feature-with-plan` | 仕様策定→実装→コミット・pushを一括自動実行 | 小規模・低リスク変更を確認なしで進めたいとき |
 | `/auto-add-feature-ui-with-plan` | 仕様策定→実装（E2E付き）→コミット・pushを一括自動実行 | 同上（E2Eあり） |
-| `/resume-work` | 中断した作業の再開 | 途中で止まった作業を続けるとき |
+| `/fix-bug` | バグ修正（再現→最小化→仮説→修正→回帰確認） | バグを再現してから確実に直したいとき |
+| `/resume-work` | 中断した作業の再開（Handoff セクションから復元） | 途中で止まった作業を続けるとき |
 | `/review-docs` | ドキュメントのレビュー | ドキュメントの品質を確認したいとき |
 | `/generate-readme` | README.md の自動生成 | README を更新したいとき |
 
@@ -237,6 +240,7 @@ sequenceDiagram
 ├── CLAUDE.md                 # プロジェクトメモリ（Claude Code が常に参照）
 │
 ├── docs/                     # 設計ドキュメント（/setup-project で生成）
+│   ├── glossary.md           #   プロジェクト共有言語（ドメイン用語・命名規則）
 │   ├── ideas/                #   アイデアメモ・壁打ち結果・仕様書
 │   └── adr/                  #   アーキテクチャ意思決定記録
 ├── .steering/                # 変更単位の実行仕様（/add-feature で生成）
@@ -246,15 +250,17 @@ sequenceDiagram
 
 ### docs/ / docs/ideas/ / .steering/ の使い分け
 
-| ディレクトリ | 役割 | 作成タイミング |
+| ディレクトリ / ファイル | 役割 | 作成タイミング |
 |---|---|---|
 | `docs/` | プロダクト全体の長期ドキュメント（PRD・設計書など） | `/setup-project` 実行時 |
+| `docs/glossary.md` | プロジェクト共有言語（ドメイン用語・命名規則・禁止語） | `/setup-project` 実行時に生成 |
 | `docs/ideas/` | アイデアメモ・壁打ち結果・仕様書（実装前の素材） | `/plan-kaizen` 実行時 |
 | `.steering/YYYYMMDD-name/` | 変更単位の実行仕様（requirements / design / tasklist） | `/add-feature` 実行時 |
 
 - `docs/` はプロダクトの全体像を定義する **長期ドキュメント**
+- `docs/glossary.md` はプロジェクト全体で用語・命名を統一するための **共有言語** （存在する場合、コマンドが自動参照する）
 - `docs/ideas/` は実装前に固める **仕様素材**（実装後も残す）
-- `.steering/` は1変更ごとに作る **作業ログ**（完了後も履歴として残す）
+- `.steering/` は1変更ごとに作る **作業ログ**（Handoff セクションで中断・再開を記録）
 
 ## カスタマイズ
 
@@ -294,18 +300,19 @@ sequenceDiagram
 
 | 日付 | 変更内容 |
 |------|---------|
+| 2026-06-01 | `/fix-bug` コマンド新規追加・TDD/red-green-refactor 方針・Handoff 支援（中断・再開記録）・`add-feature-ui` 安全停止強化・`docs/glossary.md` 共有言語化・`implementation-validator` 構造レビュー追加 |
 | 2026-05-26 | ビルトインコマンド（/run-skill-generator, /run, /verify）運用方針を統合・auto系安全チェック強化・開発ガイドライン拡充 |
 | 2026-04-03 | auto-add-feature-with-plan / auto-add-feature-ui-with-plan コマンドを追加 |
 | 2026-04-03 | README にサブエージェント一覧・ルール一覧・Mermaid ワークフロー図を追加 |
 | 2026-03-27 | generate-readme コマンドに変更履歴セクション自動生成機能を追加 |
-| 2026-03-26 | plan-kaizen と plan モードの競合防止ガードレールを追加 |
-| 2026-03-25 | README 刷新・ベストプラクティスドキュメント整理 |
 
 <details>
 <summary>過去の変更履歴</summary>
 
 | 日付 | 変更内容 |
 |------|---------|
+| 2026-03-26 | plan-kaizen と plan モードの競合防止ガードレールを追加 |
+| 2026-03-25 | README 刷新・ベストプラクティスドキュメント整理 |
 | 2026-03-18 | Hooks 品質チェック・ADR ガイドライン・参考ドキュメント拡充 |
 | 2026-03-16 | フィードバック速度改善・開発ガイドライン追加・セッション継続性強化 |
 | 2026-03-10 | テンプレートのスキル・コマンド・ドキュメントを細部改善 |
@@ -339,4 +346,4 @@ sequenceDiagram
 playwright mcp で https://example.com にアクセスして、検索ボックスに「テスト」と入力して検索結果のスクリーンショットを撮って
 ```
 
-<!-- readme-generated: 2026-05-26T00:00:00 -->
+<!-- readme-generated: 2026-06-01T00:00:00 -->
