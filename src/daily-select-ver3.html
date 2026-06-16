@@ -219,6 +219,20 @@
             background-color: #f8fafc;
         }
 
+        .days-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .day-column {
+            flex: 1;
+            border-right: 1px solid var(--border);
+        }
+
+        .day-column:last-child {
+            border-right: none;
+        }
+
         .time-label {
             height: 45px;
             display: flex;
@@ -261,6 +275,10 @@
 
         .slot:last-child {
             border-bottom: none;
+        }
+
+        .day-column:last-child .slot {
+            border-right: none;
         }
 
         .slot::before {
@@ -734,6 +752,10 @@
                 }
                 currentDate.setDate(currentDate.getDate() + 1);
             }
+
+            // デバッグ情報をコンソールに出力
+            console.log(`生成された日付カラム数: ${columnIndex - 1}`);
+            console.log(`時間スロット数: ${timeSlots.length}`);
 
             // 不要になった日付カラムをクリア
             for (let day = columnIndex; day <= 14; day++) {
