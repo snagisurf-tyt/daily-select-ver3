@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Select 3</title>
+    <style>
+        :root {
+            --primary: #1a3a6d;
+            --primary-light: #2c5282;
+            --secondary: #3182ce;
+            --accent: #4299e1;
+            --light: #ebf8ff;
+            --dark: #2d3748;
+            --border: #cbd5e0;
+            --selected: #4fd1c5;
+            --hover: #bee3f8;
+            --success: #48bb78;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e6fffa);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .app-info {
+            background-color: var(--light);
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .instructions-toggle {
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .instructions-content {
+            display: none;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-top: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .instructions-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scheduler-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .control-group select,
+        .control-group input {
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        .btn-reset {
+            background: linear-gradient(to right, #e53e3e, #c53030);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            align-self: flex-end;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .calendar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            display: flex;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .time-header {
+            width: 80px;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .day-header {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .day-header:last-child {
+            border-right: none;
+        }
+
+        .slots-container {
+            display: flex;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .time-labels {
+            width: 80px;
+            border-right: 1px solid var(--border);
+            background-color: #f8fafc;
+        }
+
+        .time-label {
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .time-label:last-child {
+            border-bottom: none;
+        }
+
+        .days-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .day-column {
+            flex: 1;
+            border-right: 1px solid var(--border);
+        }
+
+        .day-column:last-child {
+            border-right: none;
+        }
+
+        .slot {
+            height: 45px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot:last-child {
+            border-bottom: none;
+        }
+
+        .slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--selected);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .slot:hover {
+            background-color: var(--hover);
+        }
+
+        .slot.selected {
+            background-color: var(--selected);
+            color: white;
+            font-weight: bold;
+        }
+
+        .slot.selected::after {
+            content: '✓';
+            position: absolute;
+            font-size: 1.2rem;
+        }
+
+        .output-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .output-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .output-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-option input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .output-text {
+            width: 100%;
+            min-height: 180px;
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            background-color: #f8fafc;
+            margin-bottom: 20px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .output-text:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-copy {
+            background: linear-gradient(to right, var(--success), #38a169);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            color: var(--dark);
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .slots-container {
+                max-height: 400px;
+            }
+
+            .time-label {
+                font-size: 0.8rem;
+            }
+
+            .slot {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Daily Select 3</h1>
+            <p class="subtitle">シンプルで直感的なスケジュール調整アプリ</p>
+        </header>
+
+        <div class="app-info">
+            <button class="instructions-toggle" onclick="toggleInstructions()">
+                <span>ℹ️</span> アプリ使用方法はこちら
+            </button>
+            <div class="instructions-content" id="instructions">
+                <h3>使い方ガイド</h3>
+                <ol>
+                    <li><strong>日付と時間帯を選択</strong>: カレンダー上のセルをクリックして希望時間帯を選択してください</li>
+                    <li><strong>出力形式を選択</strong>: 「日本語形式」または「標準形式」から選んでください</li>
+                    <li><strong>選択内容を確認</strong>: 下部のテキストエリアに選択した時間帯が表示されます</li>
+                    <li><strong>クリップボードにコピー</strong>: 「コピー」ボタンで簡単に共有できます</li>
+                    <li><strong>設定変更</strong>: 左側のコントロールで日付範囲、時間軸、会議時間を変更できます</li>
+                </ol>
+                <p><strong>ヒント</strong>: 選択した時間帯はページを離れても保持されます（ブラウザのローカルストレージを使用）。</p>
+            </div>
+        </div>
+
+        <div class="scheduler-container">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="start-date">開始日:</label>
+                    <input type="date" id="start-date" value="2026-06-15">
+                </div>
+
+                <div class="control-group">
+                    <label for="end-date">終了日:</label>
+                    <input type="date" id="end-date" value="2026-06-19">
+                </div>
+
+                <div class="control-group">
+                    <label for="time-interval">時間軸:</label>
+                    <select id="time-interval">
+                        <option value="30">30分ごと</option>
+                        <option value="60" selected>1時間ごと</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="meeting-duration">会議時間:</label>
+                    <select id="meeting-duration">
+                        <option value="30">30分</option>
+                        <option value="60" selected>1時間</option>
+                        <option value="90">1時間30分</option>
+                        <option value="120">2時間</option>
+                    </select>
+                </div>
+
+                <button class="btn-reset" onclick="resetSelection()">
+                    🔄 リセット
+                </button>
+            </div>
+
+            <div class="calendar">
+                <div class="calendar-header">
+                    <div class="time-header">時間</div>
+                    <div class="day-header" id="day1">6月15日(月)</div>
+                    <div class="day-header" id="day2">6月16日(火)</div>
+                    <div class="day-header" id="day3">6月17日(水)</div>
+                    <div class="day-header" id="day4">6月18日(木)</div>
+                    <div class="day-header" id="day5">6月19日(金)</div>
+                </div>
+
+                <div class="slots-container">
+                    <div class="time-labels" id="time-labels">
+                        <!-- 時間ラベルがここに表示されます -->
+                    </div>
+
+                    <div class="days-container">
+                        <div class="day-column" id="day-column-1">
+                            <!-- 時間スロットがここに表示されます -->
+                        </div>
+                        <div class="day-column" id="day-column-2">
+                            <!-- 時間スロットがここに表示されます -->
+                        </div>
+                        <div class="day-column" id="day-column-3">
+                            <!-- 時間スロットがここに表示されます -->
+                        </div>
+                        <div class="day-column" id="day-column-4">
+                            <!-- 時間スロットがここに表示されます -->
+                        </div>
+                        <div class="day-column" id="day-column-5">
+                            <!-- 時間スロットがここに表示されます -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">📋 選択した時間帯</h2>
+
+                <div class="output-options">
+                    <div class="output-option">
+                        <input type="radio" id="japanese-format" name="output-format" value="japanese" checked>
+                        <label for="japanese-format">日本語形式</label>
+                    </div>
+                    <div class="output-option">
+                        <input type="radio" id="standard-format" name="output-format" value="standard">
+                        <label for="standard-format">標準形式</label>
+                    </div>
+                </div>
+
+                <textarea class="output-text" id="output-text" readonly placeholder="選択した時間帯がここに表示されます..."></textarea>
+
+                <div class="actions">
+                    <button class="btn-copy" onclick="copyToClipboard()">
+                        📋 クリップボードにコピー
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">
+            コピーしました！
+        </div>
+
+        <footer>
+            <p>Daily Select 3 &copy; 2026 | スケジュール調整をもっとシンプルに</p>
+        </footer>
+    </div>
+
+    <script>
+        // グローバル変数
+        let selectedSlots = {};
+        const timeSlots30 = []; // 30分間隔の時間スロット
+        const timeSlots60 = []; // 1時間間隔の時間スロット
+
+        // 30分間隔の時間スロットを生成 (6:00-22:00)
+        for (let hour = 6; hour < 22; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const startHour = hour.toString().padStart(2, '0');
+                const startMinute = minute.toString().padStart(2, '0');
+                const endMinute = (minute + 30) % 60;
+                const endHour = endMinute === 0 && minute === 30 ? (hour + 1) : hour;
+                const endHourStr = endHour.toString().padStart(2, '0');
+                const endMinuteStr = endMinute.toString().padStart(2, '0');
+
+                timeSlots30.push({
+                    start: `${startHour}:${startMinute}`,
+                    end: `${endHourStr}:${endMinuteStr}`
+                });
+            }
+        }
+
+        // 1時間間隔の時間スロットを生成 (6:00-22:00)
+        for (let hour = 6; hour < 22; hour++) {
+            timeSlots60.push({
+                start: `${hour.toString().padStart(2, '0')}:00`,
+                end: `${(hour + 1).toString().padStart(2, '0')}:00`
+            });
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
+            loadSelections();
+            updateOutput();
+
+            // イベントリスナー
+            document.getElementById('start-date').addEventListener('change', updateCalendar);
+            document.getElementById('end-date').addEventListener('change', updateCalendar);
+            document.getElementById('time-interval').addEventListener('change', updateCalendar);
+            document.getElementById('meeting-duration').addEventListener('change', updateCalendar);
+            document.querySelectorAll('input[name="output-format"]').forEach(radio => {
+                radio.addEventListener('change', updateOutput);
+            });
+        });
+
+        // カレンダーを初期化
+        function initializeCalendar() {
+            updateDayHeaders();
+            createSlots();
+            updateCalendar();
+        }
+
+        // 開始日と終了日から日数を計算
+        function calculateDaysBetween() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            return Math.min(diffDays, 14); // 最大14日まで表示
+        }
+
+        // 曜日ヘッダーを更新
+        function updateDayHeaders() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const days = calculateDaysBetween();
+
+            // 不要になった日付ヘッダーをクリア
+            for (let i = days + 1; i <= 14; i++) {
+                const dayHeader = document.getElementById(`day${i}`);
+                if (dayHeader) {
+                    dayHeader.parentElement.removeChild(dayHeader);
+                }
+            }
+
+            for (let i = 1; i <= days; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + (i - 1));
+
+                // 日付ヘッダーが存在しない場合は作成
+                let dayHeader = document.getElementById(`day${i}`);
+                if (!dayHeader) {
+                    dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.id = `day${i}`;
+                    document.querySelector('.calendar-header').appendChild(dayHeader);
+                }
+
+                const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+                dayHeader.textContent = `${date.getMonth() + 1}月${date.getDate()}日(${weekday})`;
+            }
+        }
+
+        // 時間ラベルを更新
+        function updateTimeLabels() {
+            const timeLabelsContainer = document.getElementById('time-labels');
+            timeLabelsContainer.innerHTML = '';
+
+            const interval = parseInt(document.getElementById('time-interval').value);
+            const timeSlots = interval === 30 ? timeSlots30 : timeSlots60;
+
+            timeSlots.forEach(slot => {
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'time-label';
+                timeLabel.textContent = slot.start;
+                timeLabelsContainer.appendChild(timeLabel);
+            });
+        }
+
+        // スロットを作成
+        function createSlots() {
+            const interval = parseInt(document.getElementById('time-interval').value);
+            const timeSlots = interval === 30 ? timeSlots30 : timeSlots60;
+            const days = calculateDaysBetween();
+
+            // 不要になった日付カラムをクリア
+            for (let day = days + 1; day <= 14; day++) {
+                const dayColumn = document.getElementById(`day-column-${day}`);
+                if (dayColumn) {
+                    dayColumn.parentElement.removeChild(dayColumn);
+                }
+            }
+
+            for (let day = 1; day <= days; day++) {
+                // 日付カラムが存在しない場合は作成
+                let dayColumn = document.getElementById(`day-column-${day}`);
+                if (!dayColumn) {
+                    dayColumn = document.createElement('div');
+                    dayColumn.className = 'day-column';
+                    dayColumn.id = `day-column-${day}`;
+                    document.querySelector('.days-container').appendChild(dayColumn);
+                }
+                dayColumn.innerHTML = '';
+
+                timeSlots.forEach((slot, index) => {
+                    const slotElement = document.createElement('div');
+                    slotElement.className = 'slot';
+                    slotElement.dataset.day = day;
+                    slotElement.dataset.timeIndex = index;
+                    slotElement.textContent = '';
+                    slotElement.addEventListener('click', () => toggleSlot(day, index));
+                    dayColumn.appendChild(slotElement);
+                });
+            }
+        }
+
+        // スロットを選択/解除
+        function toggleSlot(day, timeIndex) {
+            const key = `${day}-${timeIndex}`;
+            const slotElement = document.querySelector(`.slot[data-day="${day}"][data-time-index="${timeIndex}"]`);
+
+            if (selectedSlots[key]) {
+                delete selectedSlots[key];
+                slotElement.classList.remove('selected');
+            } else {
+                selectedSlots[key] = true;
+                slotElement.classList.add('selected');
+            }
+
+            saveSelections();
+            updateOutput();
+        }
+
+        // 出力を更新
+        function updateOutput() {
+            const outputFormat = document.querySelector('input[name="output-format"]:checked').value;
+            const startDate = new Date(document.getElementById('start-date').value);
+            const outputText = document.getElementById('output-text');
+            const days = calculateDaysBetween();
+
+            let output = '';
+
+            // 選択されたスロットを日付ごとに整理
+            const slotsByDay = {};
+            for (let i = 1; i <= days; i++) {
+                slotsByDay[i] = [];
+            }
+
+            Object.keys(selectedSlots).forEach(key => {
+                const [day, timeIndex] = key.split('-').map(Number);
+                if (!slotsByDay[day]) slotsByDay[day] = [];
+                slotsByDay[day].push(timeIndex);
+            });
+
+            // 出力テキストを生成
+            for (let day = 1; day <= days; day++) {
+                if (slotsByDay[day].length === 0) continue;
+
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + (day - 1));
+
+                if (outputFormat === 'japanese') {
+                    const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+                    output += `${date.getMonth() + 1}月${date.getDate()}日（${weekday}）\n`;
+                } else {
+                    const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+                    output += `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}(${weekday})\n`;
+                }
+
+                // 選択された時間帯をソートして出力
+                slotsByDay[day].sort((a, b) => a - b);
+                const interval = parseInt(document.getElementById('time-interval').value);
+                const timeSlots = interval === 30 ? timeSlots30 : timeSlots60;
+
+                slotsByDay[day].forEach(timeIndex => {
+                    const slot = timeSlots[timeIndex];
+                    output += `  ${slot.start}-${slot.end}\n`;
+                });
+
+                output += '\n';
+            }
+
+            outputText.value = output.trim();
+        }
+
+        // カレンダーを更新
+        function updateCalendar() {
+            updateTimeLabels();
+            updateDayHeaders();
+            loadSelections();
+            refreshSlotDisplay();
+        }
+
+        // スロット表示を更新
+        function refreshSlotDisplay() {
+            // すべてのスロットの選択状態をクリア
+            document.querySelectorAll('.slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // 選択されたスロットにクラスを適用
+            Object.keys(selectedSlots).forEach(key => {
+                const [day, timeIndex] = key.split('-');
+                const slotElement = document.querySelector(`.slot[data-day="${day}"][data-time-index="${timeIndex}"]`);
+                if (slotElement) {
+                    slotElement.classList.add('selected');
+                }
+            });
+        }
+
+        // 選択をリセット
+        function resetSelection() {
+            if (confirm('本当にすべての選択をクリアしますか？')) {
+                selectedSlots = {};
+                localStorage.removeItem('dailySelect3_selections');
+                refreshSlotDisplay();
+                updateOutput();
+            }
+        }
+
+        // 選択を保存
+        function saveSelections() {
+            localStorage.setItem('dailySelect3_selections', JSON.stringify(selectedSlots));
+        }
+
+        // 選択を読み込み
+        function loadSelections() {
+            const saved = localStorage.getItem('dailySelect3_selections');
+            if (saved) {
+                selectedSlots = JSON.parse(saved);
+            }
+        }
+
+        // クリップボードにコピー
+        function copyToClipboard() {
+            const outputText = document.getElementById('output-text');
+            outputText.select();
+            document.execCommand('copy');
+
+            // 通知を表示
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // 使用方法の表示切り替え
+        function toggleInstructions() {
+            const instructions = document.getElementById('instructions');
+            instructions.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
