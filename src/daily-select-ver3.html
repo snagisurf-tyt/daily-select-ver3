@@ -600,43 +600,73 @@
             updateCalendar();
         }
 
-        // 開始日と終了日から日数を計算
+        // 開始日と終了日から日数を計算（土日を除外）
         function calculateDaysBetween() {
             const startDate = new Date(document.getElementById('start-date').value);
             const endDate = new Date(document.getElementById('end-date').value);
-            const diffTime = Math.abs(endDate - startDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            return Math.min(diffDays, 14); // 最大14日まで表示
-        }
 
-        // 曜日ヘッダーを更新
-        function updateDayHeaders() {
-            const startDate = new Date(document.getElementById('start-date').value);
-            const days = calculateDaysBetween();
+            // 土日を除外した日数を計算
+            let weekdays = 0;
+            const currentDate = new Date(startDate);
 
-            // 不要になった日付ヘッダーをクリア
-            for (let i = days + 1; i <= 14; i++) {
-                const dayHeader = document.getElementById(`day${i}`);
-                if (dayHeader) {
-                    dayHeader.parentElement.removeChild(dayHeader);
+            // 開始日も終了日も含めるため、終了日の翌日までループ
+            while (currentDate <= endDate) {
+                const dayOfWeek = currentDate.getDay();
+                // 日曜日(0)と土曜日(6)を除外
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    weekdays++;
                 }
+                currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            for (let i = 1; i <= days; i++) {
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + (i - 1));
+            return Math.min(weekdays, 14); // 最大14日まで表示
+        }
 
-                // 日付ヘッダーが存在しない場合は作成
-                let dayHeader = document.getElementById(`day${i}`);
-                if (!dayHeader) {
-                    dayHeader = document.createElement('div');
-                    dayHeader.className = 'day-header';
-                    dayHeader.id = `day${i}`;
-                    document.querySelector('.calendar-header').appendChild(dayHeader);
+        // 曜日ヘッダーを更新（土日を除外）
+        function updateDayHeaders() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            const days = calculateDaysBetween();
+
+            // 既存の日付ヘッダーをすべてクリア
+            const calendarHeader = document.querySelector('.calendar-header');
+            const existingHeaders = calendarHeader.querySelectorAll('.day-header');
+            existingHeaders.forEach(header => header.remove());
+
+            // 土日を除外した日付ヘッダーを生成
+            let weekdays = 0;
+            const currentDate = new Date(startDate);
+            let headerIndex = 1;
+
+            while (currentDate <= endDate && weekdays < 14) {
+                const dayOfWeek = currentDate.getDay();
+                // 日曜日(0)と土曜日(6)を除外
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    weekdays++;
+
+                    // 日付ヘッダーが存在しない場合は作成
+                    let dayHeader = document.getElementById(`day${headerIndex}`);
+                    if (!dayHeader) {
+                        dayHeader = document.createElement('div');
+                        dayHeader.className = 'day-header';
+                        dayHeader.id = `day${headerIndex}`;
+                        calendarHeader.appendChild(dayHeader);
+                    }
+
+                    const weekday = ['日', '月', '火', '水', '木', '金', '土'][dayOfWeek];
+                    dayHeader.textContent = `${currentDate.getMonth() + 1}月${currentDate.getDate()}日(${weekday})`;
+
+                    headerIndex++;
                 }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
 
-                const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
-                dayHeader.textContent = `${date.getMonth() + 1}月${date.getDate()}日(${weekday})`;
+            // 不要になった日付ヘッダーをクリア
+            for (let i = headerIndex; i <= 14; i++) {
+                const dayHeader = document.getElementById(`day${i}`);
+                if (dayHeader) {
+                    dayHeader.remove();
+                }
             }
         }
 
@@ -656,40 +686,61 @@
             });
         }
 
-        // スロットを作成
+        // スロットを作成（土日を除外）
         function createSlots() {
             const interval = parseInt(document.getElementById('time-interval').value);
             const timeSlots = interval === 30 ? timeSlots30 : timeSlots60;
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
             const days = calculateDaysBetween();
 
-            // 不要になった日付カラムをクリア
-            for (let day = days + 1; day <= 14; day++) {
-                const dayColumn = document.getElementById(`day-column-${day}`);
-                if (dayColumn) {
-                    dayColumn.parentElement.removeChild(dayColumn);
+            // 既存の日付カラムをすべてクリア
+            const daysContainer = document.querySelector('.days-container');
+            const existingColumns = daysContainer.querySelectorAll('.day-column');
+            existingColumns.forEach(column => column.remove());
+
+            // 土日を除外した日付カラムを生成
+            let weekdays = 0;
+            const currentDate = new Date(startDate);
+            let columnIndex = 1;
+
+            while (currentDate <= endDate && weekdays < 14) {
+                const dayOfWeek = currentDate.getDay();
+                // 日曜日(0)と土曜日(6)を除外
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    weekdays++;
+
+                    // 日付カラムが存在しない場合は作成
+                    let dayColumn = document.getElementById(`day-column-${columnIndex}`);
+                    if (!dayColumn) {
+                        dayColumn = document.createElement('div');
+                        dayColumn.className = 'day-column';
+                        dayColumn.id = `day-column-${columnIndex}`;
+                        daysContainer.appendChild(dayColumn);
+                    }
+                    dayColumn.innerHTML = '';
+
+                    timeSlots.forEach((slot, index) => {
+                        const slotElement = document.createElement('div');
+                        slotElement.className = 'slot';
+                        slotElement.dataset.day = columnIndex; // dayではなくcolumnIndexを使用
+                        slotElement.dataset.timeIndex = index;
+                        slotElement.textContent = '';
+                        slotElement.addEventListener('click', () => toggleSlot(columnIndex, index));
+                        dayColumn.appendChild(slotElement);
+                    });
+
+                    columnIndex++;
                 }
+                currentDate.setDate(currentDate.getDate() + 1);
             }
 
-            for (let day = 1; day <= days; day++) {
-                // 日付カラムが存在しない場合は作成
-                let dayColumn = document.getElementById(`day-column-${day}`);
-                if (!dayColumn) {
-                    dayColumn = document.createElement('div');
-                    dayColumn.className = 'day-column';
-                    dayColumn.id = `day-column-${day}`;
-                    document.querySelector('.days-container').appendChild(dayColumn);
+            // 不要になった日付カラムをクリア
+            for (let day = columnIndex; day <= 14; day++) {
+                const dayColumn = document.getElementById(`day-column-${day}`);
+                if (dayColumn) {
+                    dayColumn.remove();
                 }
-                dayColumn.innerHTML = '';
-
-                timeSlots.forEach((slot, index) => {
-                    const slotElement = document.createElement('div');
-                    slotElement.className = 'slot';
-                    slotElement.dataset.day = day;
-                    slotElement.dataset.timeIndex = index;
-                    slotElement.textContent = '';
-                    slotElement.addEventListener('click', () => toggleSlot(day, index));
-                    dayColumn.appendChild(slotElement);
-                });
             }
         }
 
@@ -721,8 +772,25 @@
 
             // 選択されたスロットを日付ごとに整理
             const slotsByDay = {};
-            for (let i = 1; i <= days; i++) {
-                slotsByDay[i] = [];
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+
+            // 土日を除外した日付マッピングを生成
+            let weekdays = 0;
+            const currentDate = new Date(startDate);
+            const dayMapping = {}; // UI上の列番号 -> 実際の日付
+            let columnCount = 1;
+
+            while (currentDate <= endDate && weekdays < 14) {
+                const dayOfWeek = currentDate.getDay();
+                // 日曜日(0)と土曜日(6)を除外
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                    weekdays++;
+                    dayMapping[columnCount] = new Date(currentDate); // 日付オブジェクトをコピー
+                    slotsByDay[columnCount] = [];
+                    columnCount++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
             }
 
             Object.keys(selectedSlots).forEach(key => {
@@ -732,11 +800,10 @@
             });
 
             // 出力テキストを生成
-            for (let day = 1; day <= days; day++) {
+            for (let day = 1; day <= Object.keys(slotsByDay).length; day++) {
                 if (slotsByDay[day].length === 0) continue;
 
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + (day - 1));
+                const date = dayMapping[day]; // dayMappingから実際の日付を取得
 
                 if (outputFormat === 'japanese') {
                     const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
