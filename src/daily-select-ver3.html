@@ -597,6 +597,8 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', function() {
+            // 時間スロット配列を初期化
+            initializeTimeSlots();
             initializeCalendar();
             loadSelections();
             updateOutput();
@@ -611,8 +613,42 @@
             });
         });
 
+        // 時間スロット配列を初期化
+        function initializeTimeSlots() {
+            // 30分間隔の時間スロットを生成 (6:00-22:00)
+            timeSlots30.length = 0; // 配列をクリア
+            for (let hour = 6; hour < 22; hour++) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    const startHour = hour.toString().padStart(2, '0');
+                    const startMinute = minute.toString().padStart(2, '0');
+                    const endMinute = (minute + 30) % 60;
+                    const endHour = endMinute === 0 && minute === 30 ? (hour + 1) : hour;
+                    const endHourStr = endHour.toString().padStart(2, '0');
+                    const endMinuteStr = endMinute.toString().padStart(2, '0');
+
+                    timeSlots30.push({
+                        start: `${startHour}:${startMinute}`,
+                        end: `${endHourStr}:${endMinuteStr}`
+                    });
+                }
+            }
+
+            // 1時間間隔の時間スロットを生成 (6:00-22:00)
+            timeSlots60.length = 0; // 配列をクリア
+            for (let hour = 6; hour < 22; hour++) {
+                timeSlots60.push({
+                    start: `${hour.toString().padStart(2, '0')}:00`,
+                    end: `${(hour + 1).toString().padStart(2, '0')}:00`
+                });
+            }
+
+            console.log(`30分間隔の時間スロット数: ${timeSlots30.length}`);
+            console.log(`1時間間隔の時間スロット数: ${timeSlots60.length}`);
+        }
+
         // カレンダーを初期化
         function initializeCalendar() {
+            updateTimeLabels();
             updateDayHeaders();
             createSlots();
             updateCalendar();
